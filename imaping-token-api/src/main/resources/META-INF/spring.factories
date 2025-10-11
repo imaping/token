@@ -1,0 +1,3 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+  com.imaping.token.api.config.TokenApiConfig,\
+  com.imaping.token.api.config.TokenSchedulingConfiguration
