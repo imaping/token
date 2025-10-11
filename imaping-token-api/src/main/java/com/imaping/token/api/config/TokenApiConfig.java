@@ -1,7 +1,7 @@
 package com.imaping.token.api.config;
 
 import com.imaping.token.api.factory.*;
-import com.imaping.token.configuration.DubheConfigurationProperties;
+import com.imaping.token.configuration.IMapingConfigurationProperties;
 import com.imaping.token.api.authentication.TokenUserInfoContext;
 import com.imaping.token.api.common.BeanCondition;
 import com.imaping.token.api.common.BeanSupplier;
@@ -9,7 +9,6 @@ import com.imaping.token.api.expiration.builder.ExpirationPolicyBuilder;
 import com.imaping.token.api.expiration.builder.HardTimeoutExpirationPolicyBuilder;
 import com.imaping.token.api.expiration.builder.HardTimeoutExpirationPolicyDefaultBuilder;
 import com.imaping.token.api.expiration.builder.TimeoutExpirationPolicyBuilder;
-import com.imaping.token.api.factory.*;
 import com.imaping.token.api.generator.DefaultUniqueTokenIdGenerator;
 import com.imaping.token.api.generator.UniqueTokenIdGenerator;
 import com.imaping.token.api.lock.LockRepository;
@@ -50,7 +49,7 @@ public class TokenApiConfig {
     public LockRepository tokenRegistryLockRepository(
             final ConfigurableApplicationContext applicationContext) throws Exception {
         return BeanSupplier.of(LockRepository.class)
-                .when(BeanCondition.on("dubhe.token.registry.core.enable-locking").isTrue().evenIfMissing().given(applicationContext.getEnvironment()))
+                .when(BeanCondition.on("imaping.token.registry.core.enable-locking").isTrue().evenIfMissing().given(applicationContext.getEnvironment()))
                 .supply(LockRepository::asDefault)
                 .otherwise(LockRepository::noOp)
                 .get();
@@ -63,12 +62,12 @@ public class TokenApiConfig {
     //    }
 
     @Bean
-    public ExpirationPolicyBuilder<TimeoutAccessToken> accessTokenExpirationPolicy(final DubheConfigurationProperties properties) {
+    public ExpirationPolicyBuilder<TimeoutAccessToken> accessTokenExpirationPolicy(final IMapingConfigurationProperties properties) {
         return new TimeoutExpirationPolicyBuilder(properties);
     }
 
     @Bean
-    public HardTimeoutExpirationPolicyBuilder<HardTimeoutToken> hardTimeoutExpirationPolicy(final DubheConfigurationProperties properties) {
+    public HardTimeoutExpirationPolicyBuilder<HardTimeoutToken> hardTimeoutExpirationPolicy(final IMapingConfigurationProperties properties) {
         return new HardTimeoutExpirationPolicyDefaultBuilder<>(properties);
     }
 
@@ -101,7 +100,7 @@ public class TokenApiConfig {
 
     @ConditionalOnMissingBean(name = TokenRegistry.BEAN_NAME)
     @Bean
-    public TokenRegistry tokenRegistry(final DubheConfigurationProperties properties) {
+    public TokenRegistry tokenRegistry(final IMapingConfigurationProperties properties) {
         log.info("Runtime memory is used as the persistence storage for retrieving and managing tokens. "
                 + "Tokens that are issued during runtime will be LOST when the web server is restarted. This MAY impact SSO functionality.");
         val mem = properties.getToken().getRegistry().getInMemory();

@@ -27,10 +27,6 @@
             <groupId>com.imaping</groupId>
             <artifactId>imaping-token-api</artifactId>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>com.imaping</groupId>-->
-<!--            <artifactId>dubhe-common</artifactId>-->
-<!--        </dependency>-->
         <dependency>
             <groupId>jakarta.servlet</groupId>
             <artifactId>jakarta.servlet-api</artifactId>

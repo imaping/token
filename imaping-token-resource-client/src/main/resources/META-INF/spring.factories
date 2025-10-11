@@ -1,5 +1,3 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
   com.imaping.token.resource.client.config.ResourceClientConfig,\
-  com.imaping.token.resource.client.config.TokenSecurityConfig,\
-  com.imaping.token.resource.client.config.ServletContextPathConfig,\
-  com.imaping.token.resource.client.feign.BearerInterceptorConfig
+  com.imaping.token.resource.client.config.TokenSecurityConfig

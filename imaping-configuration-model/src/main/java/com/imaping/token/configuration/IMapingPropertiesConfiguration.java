@@ -7,6 +7,6 @@ import org.springframework.context.annotation.Configuration;
  * @author miaoj
  */
 @Configuration
-@EnableConfigurationProperties(value = {DubheConfigurationProperties.class})
-public class DubhePropertiesConfiguration {
+@EnableConfigurationProperties(value = {IMapingConfigurationProperties.class})
+public class IMapingPropertiesConfiguration {
 }

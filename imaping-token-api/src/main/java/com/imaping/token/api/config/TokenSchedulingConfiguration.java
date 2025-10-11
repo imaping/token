@@ -6,7 +6,7 @@ import com.imaping.token.api.common.BeanSupplier;
 import com.imaping.token.api.common.Cleanable;
 import com.imaping.token.api.common.FunctionUtils;
 import com.imaping.token.api.lock.LockRepository;
-import com.imaping.token.configuration.DubheConfigurationProperties;
+import com.imaping.token.configuration.IMapingConfigurationProperties;
 import com.imaping.token.api.registry.DefaultTokenRegistryCleaner;
 import com.imaping.token.api.registry.NoOpTokenRegistryCleaner;
 import com.imaping.token.api.registry.TokenRegistry;
@@ -30,7 +30,7 @@ public class TokenSchedulingConfiguration {
     @ConditionalOnMissingBean(name = "tokenRegistryCleaner")
     @Bean
     public TokenRegistryCleaner tokenRegistryCleaner(
-            final DubheConfigurationProperties properties,
+            final IMapingConfigurationProperties properties,
             @Qualifier(LockRepository.BEAN_NAME) final LockRepository lockRepository,
             @Qualifier(TokenRegistry.BEAN_NAME) final TokenRegistry tokenRegistry) {
         val isCleanerEnabled = properties.getToken().getRegistry().getCleaner().getSchedule().isEnabled();
@@ -45,13 +45,13 @@ public class TokenSchedulingConfiguration {
     }
 
     @ConditionalOnMissingBean(name = "tokenRegistryCleanerScheduler")
-    @ConditionalOnMatchingHostname(name = "dubhe.token.registry.cleaner.schedule.enabled-on-host")
+    @ConditionalOnMatchingHostname(name = "imaping.token.registry.cleaner.schedule.enabled-on-host")
     @Bean
     public Cleanable tokenRegistryCleanerScheduler(
             final ConfigurableApplicationContext applicationContext,
             @Qualifier("tokenRegistryCleaner") final TokenRegistryCleaner tokenRegistryCleaner) throws Exception {
         return BeanSupplier.of(Cleanable.class)
-                .when(BeanCondition.on("dubhe.token.registry.cleaner.schedule.enabled").isTrue()
+                .when(BeanCondition.on("imaping.token.registry.cleaner.schedule.enabled").isTrue()
                         .evenIfMissing().given(applicationContext.getEnvironment()))
                 .supply(() -> new TokenRegistryCleanerScheduler(tokenRegistryCleaner))
                 .otherwiseProxy()
@@ -62,8 +62,8 @@ public class TokenSchedulingConfiguration {
     public static class TokenRegistryCleanerScheduler implements Cleanable {
         private final TokenRegistryCleaner tokenRegistryCleaner;
 
-        @Scheduled(initialDelayString = "${dubhe.token.registry.cleaner.schedule.start-delay:PT30S}",
-                fixedDelayString = "${dubhe.token.registry.cleaner.schedule.repeat-interval:PT120S}")
+        @Scheduled(initialDelayString = "${imaping.token.registry.cleaner.schedule.start-delay:PT30S}",
+                fixedDelayString = "${imaping.token.registry.cleaner.schedule.repeat-interval:PT120S}")
         @Override
         public void clean() {
             FunctionUtils.doAndHandle(unused -> tokenRegistryCleaner.clean());

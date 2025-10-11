@@ -19,7 +19,7 @@ import java.util.stream.Stream;
 @RequiredArgsConstructor
 public class RedisTokenRegistry extends AbstractTokenRegistry {
 
-    private static final String TOKEN_PREFIX = "dubhe.token:";
+    private static final String TOKEN_PREFIX = "imaping.token:";
 
     private final TokenRedisTemplate<String, Token> client;
 

@@ -21,7 +21,7 @@ import java.io.Serializable;
 @Getter
 @Setter
 @Accessors(chain = true)
-public class DubheConfigurationProperties implements Serializable {
+public class IMapingConfigurationProperties implements Serializable {
 
     @Serial
     private static final long serialVersionUID = -5924836083122042076L;

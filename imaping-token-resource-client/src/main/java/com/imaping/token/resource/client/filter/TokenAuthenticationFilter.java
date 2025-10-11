@@ -3,7 +3,7 @@ package com.imaping.token.resource.client.filter;
 import com.imaping.token.api.authentication.DefaultBearerTokenAuthenticationToken;
 import com.imaping.token.api.exception.TokenAuthenticationException;
 import com.imaping.token.api.exception.TokenError;
-import com.imaping.token.configuration.DubheConfigurationProperties;
+import com.imaping.token.configuration.IMapingConfigurationProperties;
 import com.imaping.token.resource.client.authentication.TokenAuthenticationEntryPoint;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -34,10 +34,10 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
 
     private final AuthenticationFailureHandler authenticationFailureHandler;
 
-    private final DubheConfigurationProperties properties;
+    private final IMapingConfigurationProperties properties;
 
 
-    public TokenAuthenticationFilter(AuthenticationManager authenticationManager, TokenAuthenticationEntryPoint authenticationEntryPoint, DubheConfigurationProperties properties) {
+    public TokenAuthenticationFilter(AuthenticationManager authenticationManager, TokenAuthenticationEntryPoint authenticationEntryPoint, IMapingConfigurationProperties properties) {
         Assert.notNull(authenticationManager, "authenticationManager cannot be null");
         Assert.notNull(authenticationEntryPoint, "authenticationEntryPoint cannot be null");
         this.authenticationManager = authenticationManager;

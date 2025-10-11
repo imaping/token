@@ -1,2 +1,2 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-  com.imaping.token.configuration.DubhePropertiesConfiguration
+  com.imaping.token.configuration.IMapingPropertiesConfiguration

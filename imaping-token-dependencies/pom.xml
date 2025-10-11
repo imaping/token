@@ -81,14 +81,4 @@
             </plugin>
         </plugins>
     </build>
-    <distributionManagement>
-        <repository>
-            <id>maven-releases</id>
-            <url>http://core.pashanhoo.com:8932/repository/maven-releases</url>
-        </repository>
-        <snapshotRepository>
-            <id>maven-snapshots</id>
-            <url>http://core.pashanhoo.com:8932/repository/maven-snapshots</url>
-        </snapshotRepository>
-    </distributionManagement>
 </project>

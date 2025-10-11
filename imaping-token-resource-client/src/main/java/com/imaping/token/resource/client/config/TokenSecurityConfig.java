@@ -2,7 +2,7 @@ package com.imaping.token.resource.client.config;
 
 import com.imaping.token.api.factory.TokenFactory;
 import com.imaping.token.api.registry.TokenRegistry;
-import com.imaping.token.configuration.DubheConfigurationProperties;
+import com.imaping.token.configuration.IMapingConfigurationProperties;
 import com.imaping.token.resource.client.authentication.TokenAuthenticationEntryPoint;
 import com.imaping.token.resource.client.authentication.TokenAuthenticationProvider;
 import com.imaping.token.resource.client.filter.TokenAuthenticationFilter;
@@ -35,10 +35,10 @@ public class TokenSecurityConfig {
 
     private final TokenFactory tokenFactory;
 
-    private final DubheConfigurationProperties properties;
+    private final IMapingConfigurationProperties properties;
 
 
-    public TokenSecurityConfig(TokenRegistry tokenRegistry, @Qualifier(TokenFactory.BEAN_NAME) TokenFactory tokenFactory, DubheConfigurationProperties properties) {
+    public TokenSecurityConfig(TokenRegistry tokenRegistry, @Qualifier(TokenFactory.BEAN_NAME) TokenFactory tokenFactory, IMapingConfigurationProperties properties) {
         this.tokenRegistry = tokenRegistry;
         this.tokenFactory = tokenFactory;
         this.properties = properties;
@@ -56,7 +56,7 @@ public class TokenSecurityConfig {
 
     @Bean
     @Order(2)
-    @ConditionalOnMissingBean(name = "dubheApiFilterChain")
+    @ConditionalOnMissingBean(name = "imapingApiFilterChain")
     public SecurityFilterChain apiFilterChain(HttpSecurity http) throws Exception {
         http
                 .authenticationProvider(tokenAuthenticationProvider())
@@ -146,9 +146,9 @@ public class TokenSecurityConfig {
     public static class AuthenticationFilterDsl extends AbstractHttpConfigurer<AuthenticationFilterDsl, HttpSecurity> {
 
         private final TokenAuthenticationEntryPoint entryPoint;
-        private final DubheConfigurationProperties properties;
+        private final IMapingConfigurationProperties properties;
 
-        public AuthenticationFilterDsl(TokenAuthenticationEntryPoint entryPoint, DubheConfigurationProperties properties) {
+        public AuthenticationFilterDsl(TokenAuthenticationEntryPoint entryPoint, IMapingConfigurationProperties properties) {
             this.entryPoint = entryPoint;
             this.properties = properties;
         }
@@ -159,7 +159,7 @@ public class TokenSecurityConfig {
             http.addFilterBefore(new TokenAuthenticationFilter(authenticationManager, entryPoint, properties), UsernamePasswordAuthenticationFilter.class);
         }
 
-        public static AuthenticationFilterDsl custom(TokenAuthenticationEntryPoint entryPoint, DubheConfigurationProperties properties) {
+        public static AuthenticationFilterDsl custom(TokenAuthenticationEntryPoint entryPoint, IMapingConfigurationProperties properties) {
             return new AuthenticationFilterDsl(entryPoint, properties);
         }
     }
