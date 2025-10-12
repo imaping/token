@@ -4,14 +4,19 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 
-import java.io.Serializable;
-
+/**
+ * Minio 配置属性类.
+ *
+ * <p>配置类仅在内存中使用,无需序列化.</p>
+ *
+ * @author imaping-team
+ * @since 0.0.1
+ */
 @Getter
 @Setter
 @Accessors(chain = true)
-public class MinioProperties implements Serializable {
+public class MinioProperties {
 
-    private static final long serialVersionUID = 6031068177559847432L;
     private String host;
 
     private int port;

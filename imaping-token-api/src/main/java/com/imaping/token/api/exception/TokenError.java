@@ -8,6 +8,16 @@ import org.springframework.util.Assert;
 
 import java.io.Serializable;
 
+/**
+ * Token 错误信息类 - 封装 Token 认证错误的详细信息.
+ *
+ * <p><b>序列化要求:</b> 作为异常的一部分,可能在分布式环境中传递,
+ * 必须保留 serialVersionUID 以确保跨版本的序列化兼容性.</p>
+ *
+ * @author imaping-team
+ * @since 0.0.1
+ * @see TokenAuthenticationException
+ */
 @Getter
 @ToString
 public class TokenError implements Serializable {
@@ -25,6 +35,10 @@ public class TokenError implements Serializable {
      */
     public static String INVALID_TOKEN = "invalid_token";
 
+    /**
+     * 保留 serialVersionUID 以确保序列化兼容性.
+     * TokenError 对象作为异常的一部分可能跨 JVM 传递.
+     */
     private static final long serialVersionUID = 2157110672977988758L;
 
     private final String errorCode;

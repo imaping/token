@@ -4,14 +4,18 @@ import com.fasterxml.jackson.annotation.JsonFilter;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.io.Serializable;
-
+/**
+ * 内存 Token 注册表配置属性类.
+ *
+ * <p>配置类仅在内存中使用,无需序列化.</p>
+ *
+ * @author imaping-team
+ * @since 0.0.1
+ */
 @Getter
 @Setter
 @JsonFilter("InMemoryTokenRegistryProperties")
-public class InMemoryTokenRegistryProperties implements Serializable {
-
-    private static final long serialVersionUID = -2600525447128979994L;
+public class InMemoryTokenRegistryProperties {
 
     /**
      * Allow the token registry to cache token items for period of time

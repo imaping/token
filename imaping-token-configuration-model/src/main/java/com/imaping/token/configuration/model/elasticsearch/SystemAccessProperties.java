@@ -4,14 +4,19 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 
-import java.io.Serializable;
-
+/**
+ * 系统访问配置属性类.
+ *
+ * <p>配置类仅在内存中使用,无需序列化.</p>
+ *
+ * @author imaping-team
+ * @since 0.0.1
+ */
 @Getter
 @Setter
 @Accessors(chain = true)
-public class SystemAccessProperties implements Serializable {
+public class SystemAccessProperties {
 
-    private static final long serialVersionUID = -2707612028826747444L;
     /**
      * 索引名称
      */

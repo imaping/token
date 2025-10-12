@@ -14,17 +14,20 @@ import lombok.experimental.Accessors;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 
-import java.io.Serial;
-import java.io.Serializable;
-
+/**
+ * IMapping 主配置属性类.
+ *
+ * <p>绑定 {@code imaping.*} 配置项,由 Spring Boot 在应用启动时加载.</p>
+ * <p>配置类仅在内存中使用,由 Spring 容器管理,无需序列化.</p>
+ *
+ * @author imaping-team
+ * @since 0.0.1
+ */
 @ConfigurationProperties(prefix = "imaping")
 @Getter
 @Setter
 @Accessors(chain = true)
-public class IMapingConfigurationProperties implements Serializable {
-
-    @Serial
-    private static final long serialVersionUID = -5924836083122042076L;
+public class IMapingConfigurationProperties {
 
     @NestedConfigurationProperty
     private TokenConfigurationProperties token = new TokenConfigurationProperties();

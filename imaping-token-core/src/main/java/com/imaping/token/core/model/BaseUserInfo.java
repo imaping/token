@@ -8,9 +8,14 @@ import lombok.experimental.SuperBuilder;
 import java.io.Serializable;
 
 /**
- * 当前认证的用户信息。
+ * 基础用户信息类 - 封装用户的基本身份和组织信息.
+ *
+ * <p><b>序列化要求:</b> 作为 Principal 的一部分,随 Token 一起存储在 Redis 中,
+ * 必须保留 serialVersionUID 以确保跨版本的序列化兼容性.</p>
  *
  * @author miaoj
+ * @since 0.0.1
+ * @see com.imaping.token.api.authentication.principal.Principal
  */
 @Getter
 @Setter
@@ -21,6 +26,10 @@ import java.io.Serializable;
 @EqualsAndHashCode(of = "loginName")
 public class BaseUserInfo implements Serializable {
 
+    /**
+     * 保留 serialVersionUID 以确保序列化兼容性.
+     * BaseUserInfo 对象作为 Token 的一部分存储在 Redis 中.
+     */
     private static final long serialVersionUID = 8372445505086867962L;
 
     /**

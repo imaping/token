@@ -16,7 +16,16 @@ import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 
 /**
- * 自动续期，活动时间到期内过期
+ * 自动续期过期策略 - 活动时间到期内过期.
+ *
+ * <p>Token 在每次使用后重置过期时间,适用于需要自动续期的场景.</p>
+ *
+ * <p><b>序列化要求:</b> 作为 Token 的一部分存储在 Redis 中,
+ * 必须保留 serialVersionUID 以确保跨版本的序列化兼容性.</p>
+ *
+ * @author imaping-team
+ * @since 0.0.1
+ * @see AbstractTokenExpirationPolicy
  */
 @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)
 @Slf4j
@@ -26,6 +35,9 @@ import java.time.temporal.ChronoUnit;
 @Builder
 public class TimeoutExpirationPolicy extends AbstractTokenExpirationPolicy {
 
+    /**
+     * 保留 serialVersionUID 以确保 Redis 序列化兼容性.
+     */
     private static final long serialVersionUID = -3427615304636639301L;
 
     private long timeToKillInSeconds;

@@ -4,13 +4,19 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 
-import java.io.Serializable;
-
+/**
+ * Metricbeat 配置属性类.
+ *
+ * <p>配置类仅在内存中使用,无需序列化.</p>
+ *
+ * @author imaping-team
+ * @since 0.0.1
+ */
 @Getter
 @Setter
 @Accessors(chain = true)
-public class MetricbeatProperties  implements Serializable {
-    private static final long serialVersionUID = 6799851437642829017L;
+public class MetricbeatProperties {
+
     /**
      * 服务器监控索引名称
      */

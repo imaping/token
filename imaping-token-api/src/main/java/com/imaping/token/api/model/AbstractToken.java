@@ -12,6 +12,17 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.time.ZonedDateTime;
 
+/**
+ * Token 抽象基类.
+ *
+ * <p><b>序列化要求:</b> 此类及其子类通过 Redis 持久化存储,
+ * 必须保留 serialVersionUID 以确保跨版本的序列化兼容性.</p>
+ *
+ * @author imaping-team
+ * @since 0.0.1
+ * @see Token
+ * @see AuthenticationAwareToken
+ */
 @JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator.class)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -20,6 +31,10 @@ import java.time.ZonedDateTime;
 @Slf4j
 public abstract class AbstractToken implements Token, AuthenticationAwareToken {
 
+    /**
+     * 保留 serialVersionUID 以确保 Redis 序列化兼容性.
+     * Token 对象会存储在 Redis 中,需要跨版本兼容性.
+     */
     private static final long serialVersionUID = -4232605651875239941L;
 
     @Getter

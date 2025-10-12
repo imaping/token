@@ -7,16 +7,20 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 
-import java.io.Serializable;
-
+/**
+ * 调度任务配置属性类.
+ *
+ * <p>配置类仅在内存中使用,无需序列化.</p>
+ *
+ * @author imaping-team
+ * @since 0.0.1
+ */
 @Getter
 @Setter
 @NoArgsConstructor
 @Accessors(chain = true)
 @JsonFilter("ScheduledJobProperties")
-public class ScheduledJobProperties implements Serializable {
-
-    private static final long serialVersionUID = 9059671958275130605L;
+public class ScheduledJobProperties {
 
     /**
      * Scheduler settings to indicate how often the job should run.

@@ -5,17 +5,19 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 
-import java.io.Serializable;
-
 /**
+ * 附件配置属性类.
+ *
+ * <p>配置类仅在内存中使用,无需序列化.</p>
+ *
  * @author miaoj
+ * @since 0.0.1
  */
 @Getter
 @Setter
 @Accessors(chain = true)
-public class AttachmentProperties implements Serializable {
+public class AttachmentProperties {
 
-    private static final long serialVersionUID = 5595871874286081060L;
     @NestedConfigurationProperty
     private MinioProperties minio = new MinioProperties();
 

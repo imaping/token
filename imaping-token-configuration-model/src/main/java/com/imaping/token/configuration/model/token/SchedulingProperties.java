@@ -5,15 +5,19 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 
-import java.io.Serializable;
-
+/**
+ * 调度配置属性类.
+ *
+ * <p>配置类仅在内存中使用,无需序列化.</p>
+ *
+ * @author imaping-team
+ * @since 0.0.1
+ */
 @Getter
 @Setter
 @Accessors(chain = true)
 @JsonFilter("SchedulingProperties")
-public class SchedulingProperties implements Serializable {
-
-    private static final long serialVersionUID = -1522227059439367394L;
+public class SchedulingProperties {
 
     /**
      * Whether scheduler should be enabled to schedule the job to run.

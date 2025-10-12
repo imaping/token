@@ -6,17 +6,18 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 
-import java.io.Serial;
-import java.io.Serializable;
-
+/**
+ * 用户配置属性类.
+ *
+ * <p>配置类仅在内存中使用,无需序列化.</p>
+ *
+ * @author imaping-team
+ * @since 0.0.1
+ */
 @Getter
 @Setter
 @Accessors(chain = true)
-public class UserProperties implements Serializable {
-
-    @Serial
-    private static final long serialVersionUID = 7442143459197056640L;
-
+public class UserProperties {
 
     @NestedConfigurationProperty
     private PasswordProperties password = new PasswordProperties();

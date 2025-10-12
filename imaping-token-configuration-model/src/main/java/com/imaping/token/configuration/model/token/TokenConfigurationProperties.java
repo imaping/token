@@ -5,14 +5,20 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 
-import java.io.Serializable;
-
+/**
+ * Token 配置属性类.
+ *
+ * <p>绑定 {@code imaping.token.*} 配置项.</p>
+ * <p>配置类仅在内存中使用,无需序列化.</p>
+ *
+ * @author imaping-team
+ * @since 0.0.1
+ */
 @Getter
 @Setter
 @Accessors(chain = true)
-public class TokenConfigurationProperties implements Serializable {
+public class TokenConfigurationProperties {
 
-    private static final long serialVersionUID = -5584374037877665297L;
     @NestedConfigurationProperty
     private TokenRegistryProperties registry = new TokenRegistryProperties();
 

@@ -5,18 +5,19 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 
-import java.io.Serializable;
-
 /**
- * 日志相关属性变量
+ * ElasticSearch 配置属性类 - 日志相关属性变量.
  *
+ * <p>配置类仅在内存中使用,无需序列化.</p>
+ *
+ * @author imaping-team
+ * @since 0.0.1
  */
 @Getter
 @Setter
 @Accessors(chain = true)
-public class ElasticSearchProperties  implements Serializable {
+public class ElasticSearchProperties {
 
-    private static final long serialVersionUID = -3574936602826335893L;
     /**
      * elasticsearch节点
      */
