@@ -7,7 +7,8 @@
       "Bash(mkdir -p \"d:\\work\\program\\imaping-token\\docs\\stories\")",
       "Bash(mvn clean compile -DskipTests)",
       "Bash(mvn test)",
-      "Bash(mvn test -pl imaping-token-resource-client)"
+      "Bash(mvn test -pl imaping-token-resource-client)",
+      "Bash(mkdir -p \"d:\\work\\program\\imaping-token\\docs\\qa\\gates\")"
     ],
     "deny": [],
     "ask": []
