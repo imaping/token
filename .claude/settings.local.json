@@ -13,7 +13,8 @@
       "Bash(mvn clean compile -DskipTests -q)",
       "SlashCommand(/BMad:tasks:execute-checklist story-dod-checklist)",
       "SlashCommand(/BMad:tasks:execute-checklist:*)",
-      "Bash(mkdir -p \".github/workflows\")"
+      "Bash(mkdir -p \".github/workflows\")",
+      "Bash(git remote get-url origin)"
     ],
     "deny": [],
     "ask": []
