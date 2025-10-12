@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir -p \"d:\\work\\program\\imaping-token\\docs\")",
+      "Bash(md-tree explode \"d:\\work\\program\\imaping-token\\docs\\prd.md\" \"d:\\work\\program\\imaping-token\\docs\\prd\")",
+      "Bash(md-tree explode \"d:\\work\\program\\imaping-token\\docs\\architecture.md\" \"d:\\work\\program\\imaping-token\\docs\\architecture\")",
+      "Bash(mkdir -p \"d:\\work\\program\\imaping-token\\docs\\stories\")"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
