@@ -47,8 +47,7 @@ public class LoginController {
                         .userInfo(
                                 BaseUserInfo
                                         .builder()
-                                        .departmentName("1")
-                                        .departmentId("1")
+                                        .name("test")
                                         .build())
                         .build());
         final TimeoutTokenFactory factory = (TimeoutTokenFactory) tokenFactory.get(TimeoutAccessToken.class);

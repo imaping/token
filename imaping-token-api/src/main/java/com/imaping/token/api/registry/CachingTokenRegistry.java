@@ -4,6 +4,7 @@ import com.github.benmanes.caffeine.cache.*;
 import com.imaping.token.api.model.Token;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.lang.NonNull;
 
 import java.util.Map;
 

@@ -47,34 +47,4 @@ public class BaseUserInfo implements Serializable {
      * 用户登录名
      */
     protected String loginName;
-
-    /**
-     * 用户所属部门id
-     */
-    protected String departmentId;
-
-    /**
-     * 用户所属部门名称
-     */
-    protected String departmentName;
-
-    /**
-     * 用户所属组织机构id
-     */
-    protected String organizationId;
-
-    /**
-     * 用户所属组织机构名称
-     */
-    protected String organizationName;
-
-    /**
-     * 用户所属行政区编码
-     */
-    protected String districtCode;
-
-    /**
-     * 用户所属行政区名称
-     */
-    protected String districtName;
 }
