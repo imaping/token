@@ -1,4 +1,4 @@
-package dubhe.token.test.config;
+package imaping.token.test.config;
 
 import com.imaping.token.api.factory.TokenFactory;
 import com.imaping.token.api.registry.TokenRegistry;
@@ -24,16 +24,15 @@ public class TestSecurityConfigurerAdapter extends TokenSecurityConfig {
     }
 
 
-//    @Override
-//    protected String[] getPermitAntMatchers() {
-//        return new String[]{"/cas/validate", "/login", "/logout"};
-//    }
+    @Override
+    protected String[] getPermitAntMatchers() {
+        return new String[]{"/login", "/logout"};
+    }
 
     @Override
     protected Map<HttpMethod, String[]> getPermitAntMatchersWithMethod() {
         final Map<HttpMethod, String[]> matchers = super.getPermitAntMatchersWithMethod();
-        matchers.put(HttpMethod.GET, new String[]{"/rest/business/userinfo", "/captcha", "/cas/*", "/rest/business/workflow"});
-        matchers.put(HttpMethod.POST, new String[]{"/cas/*"});
+        matchers.put(HttpMethod.GET, new String[]{"/rest/business/userinfo", "/rest/business/workflow"});
         matchers.put(HttpMethod.OPTIONS, new String[]{"/**"});
         return matchers;
     }

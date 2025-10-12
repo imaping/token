@@ -16,6 +16,7 @@
         <module>imaping-token-api</module>
         <module>imaping-token-redis-registry</module>
         <module>imaping-token-resource-client</module>
+        <module>imaping-token-test</module>
     </modules>
 
     <groupId>com.imaping</groupId>

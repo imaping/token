@@ -4,17 +4,18 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>dubhe</groupId>
-        <artifactId>dubhe-token</artifactId>
+        <groupId>com.imaping</groupId>
+        <artifactId>imaping-token-parent</artifactId>
         <version>${revision}</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>dubhe-token-test</artifactId>
+    <artifactId>imaping-token-test</artifactId>
+    <name>imaping-token-test</name>
 
     <properties>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
@@ -34,25 +35,12 @@
             <artifactId>spring-boot-starter-undertow</artifactId>
         </dependency>
         <dependency>
-            <groupId>dubhe</groupId>
-            <artifactId>dubhe-token-cas</artifactId>
+            <groupId>com.imaping</groupId>
+            <artifactId>imaping-token-redis-registry</artifactId>
         </dependency>
         <dependency>
-            <groupId>dubhe</groupId>
-            <artifactId>dubhe-token-redis-registry</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>dubhe</groupId>
-            <artifactId>dubhe-token-resource-client</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>dubhe</groupId>
-            <artifactId>dubhe-token-captcha-redis</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
+            <groupId>com.imaping</groupId>
+            <artifactId>imaping-token-resource-client</artifactId>
         </dependency>
     </dependencies>
     <build>

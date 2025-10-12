@@ -1,4 +1,4 @@
-package dubhe.token.test.web;
+package imaping.token.test.web;
 
 import com.imaping.token.core.util.SecurityContextUtil;
 import org.springframework.web.bind.annotation.GetMapping;
