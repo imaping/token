@@ -62,25 +62,22 @@ public class TokenSecurityConfig {
                 .authenticationProvider(tokenAuthenticationProvider())
                 .httpBasic(configurer -> configurer.authenticationEntryPoint(tokenAuthenticationEntryPoint()))
                 .sessionManagement(configurer -> configurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .securityMatchers()
-                .requestMatchers()
-                .antMatchers(getAllAntMatchers())
-                .and()
+                .securityMatcher(getAllAntMatchers())
                 .authorizeHttpRequests(registry -> {
                     if (!CollectionUtils.isEmpty(getAuthenticatedAntMatchersWithMethod())) {
                         getAuthenticatedAntMatchersWithMethod().forEach((method, antPatterns) -> {
-                            registry.mvcMatchers(method, antPatterns).authenticated();
+                            registry.requestMatchers(method, antPatterns).authenticated();
                         });
                     }
                     if (!ArrayUtils.isEmpty(getAuthenticatedAntMatchers())) {
-                        registry.mvcMatchers(getAuthenticatedAntMatchers()).authenticated();
+                        registry.requestMatchers(getAuthenticatedAntMatchers()).authenticated();
                     }
                     if (!ArrayUtils.isEmpty(getPermitAntMatchers())) {
-                        registry.mvcMatchers(getPermitAntMatchers()).permitAll();
+                        registry.requestMatchers(getPermitAntMatchers()).permitAll();
                     }
                     if (!CollectionUtils.isEmpty(getPermitAntMatchersWithMethod())) {
                         getPermitAntMatchersWithMethod().forEach((method, antPatterns) -> {
-                            registry.mvcMatchers(method, antPatterns).permitAll();
+                            registry.requestMatchers(method, antPatterns).permitAll();
                         });
                     }
                     if (isAnyRequestAuthenticated()) {
@@ -90,7 +87,7 @@ public class TokenSecurityConfig {
                 .logout(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
                 .csrf(AbstractHttpConfigurer::disable)
-                .apply(AuthenticationFilterDsl.custom(tokenAuthenticationEntryPoint(), properties));
+                .with(AuthenticationFilterDsl.custom(tokenAuthenticationEntryPoint(), properties), customizer -> {});
         configure(http);
         return http.build();
     }

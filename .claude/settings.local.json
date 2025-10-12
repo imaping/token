@@ -4,7 +4,10 @@
       "Bash(mkdir -p \"d:\\work\\program\\imaping-token\\docs\")",
       "Bash(md-tree explode \"d:\\work\\program\\imaping-token\\docs\\prd.md\" \"d:\\work\\program\\imaping-token\\docs\\prd\")",
       "Bash(md-tree explode \"d:\\work\\program\\imaping-token\\docs\\architecture.md\" \"d:\\work\\program\\imaping-token\\docs\\architecture\")",
-      "Bash(mkdir -p \"d:\\work\\program\\imaping-token\\docs\\stories\")"
+      "Bash(mkdir -p \"d:\\work\\program\\imaping-token\\docs\\stories\")",
+      "Bash(mvn clean compile -DskipTests)",
+      "Bash(mvn test)",
+      "Bash(mvn test -pl imaping-token-resource-client)"
     ],
     "deny": [],
     "ask": []

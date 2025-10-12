@@ -16,24 +16,23 @@ import java.util.Map;
 
 public class TokenAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
-    private static ObjectMapper objectMapper = new ObjectMapper();
+    private static final ObjectMapper objectMapper = new ObjectMapper();
 
 
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException {
         final String loginUrl = request.getParameter("loginUrl");
         final String loginHash = request.getParameter("hash");
-        if (!StringUtils.isEmpty(loginUrl)) {
+        if (StringUtils.hasLength(loginUrl)) {
             StringBuilder redirectUrlBuilder = new StringBuilder(loginUrl);
-            if (!StringUtils.isEmpty(loginHash)) {
+            if (StringUtils.hasLength(loginHash)) {
                 redirectUrlBuilder.append("#").append(loginHash);
             }
             response.sendRedirect(redirectUrlBuilder.toString());
             return;
         }
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        if (exception instanceof TokenAuthenticationException) {
-            final TokenAuthenticationException tokenAuthenticationException = (TokenAuthenticationException) exception;
+        if (exception instanceof TokenAuthenticationException tokenAuthenticationException) {
             final TokenError error = tokenAuthenticationException.getError();
             response.setStatus(error.getHttpStatus().value());
             Map<String, Object> map = new HashMap<>();
