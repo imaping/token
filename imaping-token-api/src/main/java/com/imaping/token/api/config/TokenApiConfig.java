@@ -55,12 +55,6 @@ public class TokenApiConfig {
                 .get();
     }
 
-    //    @ConditionalOnMissingBean(name = "tokenTransactionManager")
-    //    @Bean("tokenTransactionManager")
-    //    public PlatformTransactionManager tokenTransactionManager() {
-    //        return new PseudoPlatformTransactionManager();
-    //    }
-
     @Bean
     public ExpirationPolicyBuilder<TimeoutAccessToken> accessTokenExpirationPolicy(final IMapingConfigurationProperties properties) {
         return new TimeoutExpirationPolicyBuilder(properties);

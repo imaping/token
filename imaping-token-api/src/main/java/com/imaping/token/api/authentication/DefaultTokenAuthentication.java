@@ -4,11 +4,13 @@ import lombok.Getter;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 
+import java.io.Serial;
 import java.util.Collection;
 
 @Getter
 public class DefaultTokenAuthentication extends AbstractAuthenticationToken {
 
+    @Serial
     private static final long serialVersionUID = -8103211718320156900L;
     private final Authentication authentication;
 

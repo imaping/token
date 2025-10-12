@@ -137,9 +137,14 @@ imaping-token-parent (父POM)
 │   ├── ← imaping-token-api
 │   └── [Redis存储实现]
 │
-└── imaping-token-resource-client (资源客户端)
-    ├── ← imaping-token-api
-    └── [Spring Security集成]
+├── imaping-token-resource-client (资源客户端)
+│   ├── ← imaping-token-api
+│   └── [Spring Security集成]
+│
+└── imaping-token-test (测试应用)
+    ├── ← imaping-token-redis-registry
+    ├── ← imaping-token-resource-client
+    └── [集成测试应用]
 ```
 
 ### 3.2 模块职责
@@ -304,6 +309,60 @@ com.imaping.token.resource.client
 └── jakarta.servlet-api:6.0.0 (provided)
 ```
 
+#### 3.2.7 imaping-token-test
+
+**职责**: Token 系统集成测试应用
+
+**核心类**:
+```
+imaping.token.test
+├── TokenTestApplication - Spring Boot 启动类
+├── config/
+│   └── TestSecurityConfigurerAdapter - 测试安全配置
+└── web/
+    ├── LoginController - 登录控制器
+    └── TestController - 测试控制器
+```
+
+**特性**:
+- 使用 Undertow 作为嵌入式服务器 (替代 Tomcat)
+- 集成 Redis Token Registry 和 Spring Security
+- 提供完整的 Token 认证示例
+- 配置 Maven 跳过部署 (仅用于本地测试)
+
+**依赖关系**:
+```
+├── imaping-token-redis-registry
+├── imaping-token-resource-client
+├── spring-boot-starter-web
+└── spring-boot-starter-undertow
+```
+
+**Maven 配置**:
+```xml
+<build>
+    <plugins>
+        <!-- 跳过部署到 Maven 仓库 -->
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-deploy-plugin</artifactId>
+            <configuration>
+                <skip>true</skip>
+            </configuration>
+        </plugin>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-install-plugin</artifactId>
+            <configuration>
+                <skip>true</skip>
+            </configuration>
+        </plugin>
+    </plugins>
+</build>
+```
+
+**说明**: 此模块仅用于本地开发和测试,不会被发布到 Maven 仓库
+
 ### 3.3 编译顺序
 
 Maven Reactor 构建顺序:
@@ -314,6 +373,7 @@ Maven Reactor 构建顺序:
 4. imaping-token-api
 5. imaping-token-redis-registry
 6. imaping-token-resource-client
+7. imaping-token-test
 ```
 
 ---

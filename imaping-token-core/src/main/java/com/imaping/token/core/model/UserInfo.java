@@ -7,6 +7,8 @@ import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import org.springframework.util.StringUtils;
 
+import java.io.Serial;
+
 /**
  * 当前认证的用户信息。
  *
@@ -19,6 +21,7 @@ import org.springframework.util.StringUtils;
 @SuperBuilder
 public class UserInfo extends BaseUserInfo {
 
+    @Serial
     private static final long serialVersionUID = -7249321741539317321L;
     /**
      * 当前登录用户的token

@@ -16,6 +16,7 @@ imaping-token/
 ├── imaping-token-api/                   # 核心 API 模块
 ├── imaping-token-redis-registry/        # Redis 实现模块
 ├── imaping-token-resource-client/       # 资源客户端模块
+├── imaping-token-test/                  # 测试应用模块
 ├── docs/                                # 项目文档
 │   ├── architecture.md                  # 架构文档
 │   ├── architecture/                    # 架构文档分片
@@ -313,6 +314,36 @@ imaping-token-resource-client/
 
 ---
 
+### 2.7 imaping-token-test
+
+**职责**: Token 系统测试应用
+
+```
+imaping-token-test/
+├── src/main/java/imaping/token/test/
+│   ├── TokenTestApplication.java                  # Spring Boot 启动类
+│   ├── config/                                    # 配置类
+│   │   └── TestSecurityConfigurerAdapter.java     # 测试安全配置
+│   └── web/                                       # Web 控制器
+│       ├── LoginController.java                   # 登录控制器
+│       └── TestController.java                    # 测试控制器
+│
+├── src/main/resources/
+│   └── application.properties                     # 应用配置
+│
+└── pom.xml
+```
+
+**核心特性**:
+- 使用 Undertow 作为嵌入式服务器 (替代默认的 Tomcat)
+- 集成 `imaping-token-redis-registry` 和 `imaping-token-resource-client`
+- 提供 Token 认证的完整示例和测试接口
+- 配置 `maven-deploy-plugin` 和 `maven-install-plugin` 跳过部署
+
+**说明**: 此模块仅用于本地测试,不会被部署到 Maven 仓库
+
+---
+
 ## 3. 包命名约定
 
 ### 3.1 包命名规则
@@ -400,6 +431,9 @@ src/test/resources/
 
 6. imaping-token-resource-client       (资源客户端)
    └── 依赖: imaping-token-api, Spring Security
+
+7. imaping-token-test                  (测试应用)
+   └── 依赖: imaping-token-redis-registry, imaping-token-resource-client, Spring Boot Web
 ```
 
 ### 5.2 模块依赖图
@@ -423,8 +457,12 @@ imaping-token-parent
 ├── imaping-token-redis-registry
 │   └── ← imaping-token-api
 │
-└── imaping-token-resource-client
-    └── ← imaping-token-api
+├── imaping-token-resource-client
+│   └── ← imaping-token-api
+│
+└── imaping-token-test
+    ├── ← imaping-token-redis-registry
+    └── ← imaping-token-resource-client
 ```
 
 ---

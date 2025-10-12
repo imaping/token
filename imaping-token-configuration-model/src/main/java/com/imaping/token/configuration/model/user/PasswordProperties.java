@@ -5,12 +5,15 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 @Getter
 @Setter
 @Accessors(chain = true)
 public class PasswordProperties implements Serializable {
+
+    @Serial
     private static final long serialVersionUID = 1212095910003142762L;
 
     private String defaultPassword = "psh@123";

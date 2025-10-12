@@ -78,9 +78,21 @@
 | 组件 | 最低版本 | 推荐配置 |
 |------|---------|---------|
 | **JVM** | OpenJDK 17 | `-Xmx2g -Xms2g -XX:+UseG1GC` |
-| **应用服务器** | - | 嵌入式 Tomcat (Spring Boot 默认) |
+| **应用服务器** | - | 嵌入式 Tomcat (Spring Boot 默认) / Undertow |
 | **Redis** | 6.0+ | 集群模式 (3 Master + 3 Slave) |
 | **操作系统** | Linux 4.x+ | CentOS 8+ / Ubuntu 20.04+ |
+
+### 4.3 嵌入式服务器选择
+
+| 服务器 | 特点 | 适用场景 | 使用模块 |
+|-------|------|---------|---------|
+| **Tomcat** | • Spring Boot 默认<br>• 成熟稳定<br>• 社区活跃 | 通用场景 | 所有库模块默认 |
+| **Undertow** | • 轻量级<br>• 高性能<br>• 低内存占用 | 测试环境、高并发场景 | imaping-token-test |
+
+**Undertow vs Tomcat 性能对比:**
+- 启动速度: Undertow 更快
+- 内存占用: Undertow 约为 Tomcat 的 70%
+- 吞吐量: 高并发下 Undertow 性能更优
 
 ---
 
@@ -95,6 +107,22 @@
 <dependency>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-web</artifactId>
+</dependency>
+
+<!-- 可选: 使用 Undertow 替代 Tomcat -->
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-web</artifactId>
+    <exclusions>
+        <exclusion>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-tomcat</artifactId>
+        </exclusion>
+    </exclusions>
+</dependency>
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-undertow</artifactId>
 </dependency>
 
 <!-- Spring Security -->
@@ -146,7 +174,8 @@ imaping-token (父 POM)
 ├── imaping-token-core              (核心模型)
 ├── imaping-token-api               (核心 API)
 ├── imaping-token-redis-registry    (Redis 实现)
-└── imaping-token-resource-client   (资源客户端)
+├── imaping-token-resource-client   (资源客户端)
+└── imaping-token-test              (测试应用)
 ```
 
 ### 6.2 版本管理策略
