@@ -52,17 +52,21 @@
 
 ### 🔌 集成和部署
 
-- **[集成指南](integration.md)** 🔗 (待创建)
-  - Spring Security 集成
-  - Redis 配置和优化
+- **[集成指南](integration.md)** 🔗 ⭐ 新增
+  - Spring Security 集成详细步骤
+  - Redis 配置和连接池优化
+  - 存储选择建议
   - 多实例部署配置
-  - Actuator 集成
+  - Spring Boot Actuator 集成
+  - 常见集成场景示例
 
-- **[最佳实践](best-practices.md)** ⚡ (待创建)
-  - Token 过期策略选择
+- **[最佳实践](best-practices.md)** ⚡ ⭐ 新增
+  - Token 过期策略选择指南
   - 性能优化建议
   - 安全性建议
-  - 监控和告警
+  - 故障排查指南
+  - 监控和告警建议
+  - 开发和测试最佳实践
 
 - **[故障排查](troubleshooting.md)** 🔍 (待创建)
   - 常见问题和解决方案
@@ -84,8 +88,8 @@
 
 1. ✅ [架构文档 - 部署架构](architecture.md#6-部署架构) - 了解部署模式
 2. ✅ [配置参考](configuration.md) - 生产环境配置
-3. ⬜ [集成指南](integration.md) - Redis 配置和集群部署 (待创建)
-4. ⬜ [最佳实践](best-practices.md) - 生产环境优化建议 (待创建)
+3. ✅ [集成指南](integration.md) - Redis 配置和集群部署
+4. ✅ [最佳实践](best-practices.md) - 生产环境优化建议
 
 ### 我想自定义扩展功能
 
@@ -95,7 +99,7 @@
 
 ### 我遇到了问题
 
-1. ⬜ [故障排查](troubleshooting.md) - 常见问题解决方案 (待创建)
+1. ✅ [最佳实践 - 故障排查指南](best-practices.md#4-故障排查指南) - 常见问题解决方案
 2. ✅ [架构文档](architecture.md) - 理解系统运行原理
 3. 📧 联系支持团队
 
@@ -110,8 +114,8 @@
 | [架构图表集](architecture-diagrams.md) | ✅ 已完成 | 2025-10-11 | 高 |
 | [配置参考](configuration.md) | ✅ 已完成 | 2025-10-12 | 高 |
 | [API 使用指南](api-guide.md) | ✅ 已完成 | 2025-10-12 | 中 |
-| [集成指南](integration.md) | ⬜ 待创建 | - | 中 |
-| [最佳实践](best-practices.md) | ⬜ 待创建 | - | 中 |
+| [集成指南](integration.md) | ✅ 已完成 | 2025-10-12 | 高 |
+| [最佳实践](best-practices.md) | ✅ 已完成 | 2025-10-12 | 高 |
 | [故障排查](troubleshooting.md) | ⬜ 待创建 | - | 低 |
 
 **图例**:

@@ -35,8 +35,8 @@
 
 **工作流步骤**:
 1. 检出代码
-2. 设置 JDK 17
-3. 配置 Maven settings(使用 GitHub Token)
+2. 设置 JDK 17 环境
+3. 创建 Maven settings.xml 配置文件(自动注入 GitHub Token)
 4. 构建项目 (`mvn clean verify`)
 5. 发布到 GitHub Packages (`mvn deploy`)
 
