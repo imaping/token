@@ -11,7 +11,7 @@
 
     <modules>
         <module>imaping-token-dependencies</module>
-        <module>imaping-configuration-model</module>
+        <module>imaping-token-configuration-model</module>
         <module>imaping-token-core</module>
         <module>imaping-token-api</module>
         <module>imaping-token-redis-registry</module>

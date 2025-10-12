@@ -90,7 +90,7 @@
         </dependency>
         <dependency>
             <groupId>com.imaping</groupId>
-            <artifactId>imaping-configuration-model</artifactId>
+            <artifactId>imaping-token-configuration-model</artifactId>
         </dependency>
     </dependencies>
 
