@@ -96,14 +96,14 @@ Collection<Token> tokens = tokenRegistry.getSessionsFor(userId);
     <dependency>
         <groupId>com.imaping</groupId>
         <artifactId>imaping-token-api</artifactId>
-        <version>0.0.1-SNAPSHOT</version>
+        <version>0.0.3-SNAPSHOT</version>
     </dependency>
 
     <!-- Spring Security 集成 -->
     <dependency>
         <groupId>com.imaping</groupId>
         <artifactId>imaping-token-resource-client</artifactId>
-        <version>0.0.1-SNAPSHOT</version>
+        <version>0.0.3-SNAPSHOT</version>
     </dependency>
 </dependencies>
 ```
@@ -124,21 +124,21 @@ Collection<Token> tokens = tokenRegistry.getSessionsFor(userId);
     <dependency>
         <groupId>com.imaping</groupId>
         <artifactId>imaping-token-api</artifactId>
-        <version>0.0.1-SNAPSHOT</version>
+        <version>0.0.3-SNAPSHOT</version>
     </dependency>
 
     <!-- Redis 存储实现 -->
     <dependency>
         <groupId>com.imaping</groupId>
         <artifactId>imaping-token-redis-registry</artifactId>
-        <version>0.0.1-SNAPSHOT</version>
+        <version>0.0.3-SNAPSHOT</version>
     </dependency>
 
     <!-- Spring Security 集成 -->
     <dependency>
         <groupId>com.imaping</groupId>
         <artifactId>imaping-token-resource-client</artifactId>
-        <version>0.0.1-SNAPSHOT</version>
+        <version>0.0.3-SNAPSHOT</version>
     </dependency>
 </dependencies>
 ```
@@ -501,7 +501,7 @@ imaping-token 支持三种 Token 传递方式,按优先级排序:
 <dependency>
     <groupId>com.imaping</groupId>
     <artifactId>imaping-token-redis-registry</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.3-SNAPSHOT</version>
 </dependency>
 ```
 

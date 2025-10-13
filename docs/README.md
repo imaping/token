@@ -2,7 +2,7 @@
 
 > **企业级 Token 管理和认证系统**
 >
-> 版本: 0.0.1-SNAPSHOT | Spring Boot 3.5.6 | Java 17
+> 版本: 0.0.3-SNAPSHOT | Spring Boot 3.5.6 | Java 17
 
 ---
 
