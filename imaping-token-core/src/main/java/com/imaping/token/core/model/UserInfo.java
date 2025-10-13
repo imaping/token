@@ -38,16 +38,6 @@ public class UserInfo extends BaseUserInfo {
      */
     protected boolean authenticated;
 
-
-    /**
-     * 初始化实例。
-     *
-     * @param authenticated 是否验证（即登录）
-     */
-    public UserInfo(boolean authenticated) {
-        this.authenticated = authenticated;
-    }
-
     /**
      * 此用户是否为匿名用户
      *
