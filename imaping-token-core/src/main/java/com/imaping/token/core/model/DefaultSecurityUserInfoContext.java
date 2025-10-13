@@ -1,8 +1,11 @@
 package com.imaping.token.core.model;
 
+import lombok.Setter;
+
 /**
  * @author miaoj
  */
+@Setter
 public class DefaultSecurityUserInfoContext implements SecurityUserInfoContext {
 
     private SecurityUserInfo securityUserInfo;
@@ -16,7 +19,4 @@ public class DefaultSecurityUserInfoContext implements SecurityUserInfoContext {
         return securityUserInfo;
     }
 
-    public void setSecurityUserInfo(SecurityUserInfo securityUserInfo) {
-        this.securityUserInfo = securityUserInfo;
-    }
 }

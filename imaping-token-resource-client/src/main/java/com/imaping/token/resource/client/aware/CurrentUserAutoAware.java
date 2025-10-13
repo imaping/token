@@ -15,7 +15,7 @@ import java.util.Optional;
  */
 @Component
 @ConditionalOnClass(name = "org.springframework.data.jpa.repository.config.JpaRepositoriesRegistrar")
-public class CurrentUserAutoAware implements AuditorAware<String> {
+public class CurrentUserAutoAware<T> implements AuditorAware<T> {
 
     private final UserInfoContext userInfoContext;
 
@@ -24,8 +24,8 @@ public class CurrentUserAutoAware implements AuditorAware<String> {
     }
 
     @Override
-    public Optional<String> getCurrentAuditor() {
-        final UserInfo currentUserInfo = userInfoContext.getCurrentUserInfo();
+    public Optional<T> getCurrentAuditor() {
+        final UserInfo<T> currentUserInfo = userInfoContext.getCurrentUserInfo();
         if (currentUserInfo.isAuthenticated()) {
             return Optional.of(currentUserInfo.getId());
         }

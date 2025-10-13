@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 /**
@@ -14,8 +15,8 @@ import java.io.Serializable;
  * 必须保留 serialVersionUID 以确保跨版本的序列化兼容性.</p>
  *
  * @author miaoj
- * @since 0.0.1
  * @see com.imaping.token.api.authentication.principal.Principal
+ * @since 0.0.1
  */
 @Getter
 @Setter
@@ -24,19 +25,20 @@ import java.io.Serializable;
 @SuperBuilder
 @JsonIgnoreProperties(ignoreUnknown = true)
 @EqualsAndHashCode(of = "loginName")
-public class BaseUserInfo implements Serializable {
+public class BaseUserInfo<T> implements Serializable {
 
     /**
      * 保留 serialVersionUID 以确保序列化兼容性.
      * BaseUserInfo 对象作为 Token 的一部分存储在 Redis 中.
      */
+    @Serial
     private static final long serialVersionUID = 8372445505086867962L;
 
     /**
      * 用户标识符
      */
     @JsonAlias({"id", "userId"})
-    protected String id;
+    protected T id;
 
     /**
      * 用户名称

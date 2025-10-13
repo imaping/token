@@ -24,7 +24,7 @@ import java.io.Serial;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-public class UserInfo extends BaseUserInfo {
+public class UserInfo<T> extends BaseUserInfo<T> {
 
     /**
      * 保留 serialVersionUID 以确保序列化兼容性.

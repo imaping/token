@@ -22,7 +22,7 @@ import java.io.Serial;
 @Setter
 @SuperBuilder
 @NoArgsConstructor
-public class SecurityUserInfo extends UserInfo {
+public class SecurityUserInfo<T> extends UserInfo<T> {
 
     /**
      * 保留 serialVersionUID 以确保序列化兼容性.
