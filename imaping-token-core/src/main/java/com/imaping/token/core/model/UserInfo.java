@@ -32,10 +32,6 @@ public class UserInfo extends BaseUserInfo {
      */
     @Serial
     private static final long serialVersionUID = -7249321741539317321L;
-    /**
-     * 当前登录用户的token
-     */
-    protected String accessToken;
 
     /**
      * 用户是否已认证

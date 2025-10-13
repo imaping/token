@@ -10,6 +10,7 @@ import com.imaping.token.api.expiration.ExpirationPolicy;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.Serial;
 import java.time.ZonedDateTime;
 
 /**
@@ -19,9 +20,9 @@ import java.time.ZonedDateTime;
  * 必须保留 serialVersionUID 以确保跨版本的序列化兼容性.</p>
  *
  * @author imaping-team
- * @since 0.0.1
  * @see Token
  * @see AuthenticationAwareToken
+ * @since 0.0.1
  */
 @JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator.class)
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -35,6 +36,7 @@ public abstract class AbstractToken implements Token, AuthenticationAwareToken {
      * 保留 serialVersionUID 以确保 Redis 序列化兼容性.
      * Token 对象会存储在 Redis 中,需要跨版本兼容性.
      */
+    @Serial
     private static final long serialVersionUID = -4232605651875239941L;
 
     @Getter
@@ -78,6 +80,7 @@ public abstract class AbstractToken implements Token, AuthenticationAwareToken {
         this.lastTimeUsed = this.creationTime;
         this.expirationPolicy = expirationPolicy;
         this.authentication = authentication;
+        authentication.getPrincipal().getUserInfo().setAccessToken(id);
     }
 
     @Override
