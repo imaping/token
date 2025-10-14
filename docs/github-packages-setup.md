@@ -91,7 +91,7 @@
 <dependency>
     <groupId>com.imaping</groupId>
     <artifactId>imaping-token-core</artifactId>
-    <version>0.0.3-SNAPSHOT</version>
+    <version>0.0.6-SNAPSHOT</version>
 </dependency>
 ```
 
@@ -99,7 +99,7 @@
 
 ### 快照版本(SNAPSHOT)
 
-当前版本: `0.0.3-SNAPSHOT`
+当前版本: `0.0.6-SNAPSHOT`
 
 - 自动发布到 GitHub Packages
 - 每次构建都会覆盖
