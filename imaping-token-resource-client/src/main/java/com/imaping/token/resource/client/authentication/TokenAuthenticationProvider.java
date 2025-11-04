@@ -13,6 +13,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -36,7 +42,9 @@ public class TokenAuthenticationProvider implements AuthenticationProvider {
         }
         updateTokenUsage(token);
         AuthenticationAwareToken authenticationAwareToken = (AuthenticationAwareToken) token;
-        return new DefaultTokenAuthentication(authenticationAwareToken.getAuthentication(), tokenId);
+        Set<String> roles = authenticationAwareToken.getAuthentication().getPrincipal().getUserInfo().getRoles();
+        Collection<SimpleGrantedAuthority> authorities = roles.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toCollection(() -> new ArrayList<>(roles.size())));
+        return new DefaultTokenAuthentication(authenticationAwareToken.getAuthentication(), tokenId, authorities);
     }
 
 

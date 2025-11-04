@@ -28,7 +28,7 @@
 
     <properties>
         <java.version>17</java.version>
-        <revision>0.0.6-SNAPSHOT</revision>
+        <revision>0.0.7-SNAPSHOT</revision>
 
         <flatten-maven-plugin.version>1.7.3</flatten-maven-plugin.version>
     </properties>

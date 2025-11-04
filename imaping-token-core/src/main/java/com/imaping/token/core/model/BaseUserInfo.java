@@ -7,6 +7,7 @@ import lombok.experimental.SuperBuilder;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.Set;
 
 /**
  * 基础用户信息类 - 封装用户的基本身份和组织信息.
@@ -15,8 +16,8 @@ import java.io.Serializable;
  * 必须保留 serialVersionUID 以确保跨版本的序列化兼容性.</p>
  *
  * @author miaoj
- * @since 0.0.1
  * @see com.imaping.token.api.authentication.principal.Principal
+ * @since 0.0.1
  */
 @Getter
 @Setter
@@ -54,4 +55,9 @@ public class BaseUserInfo implements Serializable {
      * 用户登录名
      */
     protected String loginName;
+
+    /**
+     * 用户角色
+     */
+    protected Set<String> roles;
 }
