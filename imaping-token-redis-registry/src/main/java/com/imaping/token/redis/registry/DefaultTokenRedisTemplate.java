@@ -26,15 +26,13 @@ public class DefaultTokenRedisTemplate<K, V> extends RedisTemplate<K, V> impleme
     public DefaultTokenRedisTemplate() {
         super();
         final RedisSerializer<String> string = new StringRedisSerializer();
-        Jackson2JsonRedisSerializer<Token> jackson2JsonRedisSerializer = new Jackson2JsonRedisSerializer<>(Token.class);
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
         // 解决jackson2无法反序列化LocalDateTime的问题
         objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         objectMapper.registerModule(new JavaTimeModule());
-        objectMapper.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL, JsonTypeInfo.As.PROPERTY);
-
-        jackson2JsonRedisSerializer.setObjectMapper(objectMapper);
+        objectMapper.activateDefaultTyping(objectMapper.getPolymorphicTypeValidator(), ObjectMapper.DefaultTyping.NON_FINAL, JsonTypeInfo.As.PROPERTY);
+        Jackson2JsonRedisSerializer<Token> jackson2JsonRedisSerializer = new Jackson2JsonRedisSerializer<>(objectMapper, Token.class);
         setKeySerializer(string);
         setValueSerializer(jackson2JsonRedisSerializer);
         setHashKeySerializer(string);
