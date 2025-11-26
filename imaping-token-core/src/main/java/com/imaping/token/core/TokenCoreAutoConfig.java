@@ -21,18 +21,18 @@ public class TokenCoreAutoConfig {
 
     @Bean(name = UserInfoContext.BEAN_NAME)
     @ConditionalOnMissingBean(name = UserInfoContext.BEAN_NAME)
-    public UserInfoContext userInfoContext() {
+    public UserInfoContext<String> userInfoContext() {
         return new DefaultUserInfoContext();
     }
 
     @Bean(name = SecurityUserInfoContext.BEAN_NAME)
     @ConditionalOnMissingBean(name = SecurityUserInfoContext.BEAN_NAME)
-    public SecurityUserInfoContext securityUserInfoContext() {
+    public SecurityUserInfoContext<String> securityUserInfoContext() {
         return new DefaultSecurityUserInfoContext();
     }
 
     @Bean
-    public SecurityContextUtil securityContextUtil(UserInfoContext userInfoContext) {
+    public SecurityContextUtil securityContextUtil(UserInfoContext<?> userInfoContext) {
         final SecurityContextUtil securityContextUtil = new SecurityContextUtil();
         securityContextUtil.setUserInfoContext(userInfoContext);
         return securityContextUtil;

@@ -31,7 +31,7 @@ public class DefaultTimeoutAccessToken extends AbstractToken implements TimeoutA
      */
     private static final long serialVersionUID = 5024818450360479885L;
 
-    public DefaultTimeoutAccessToken(String id, ExpirationPolicy expirationPolicy, Authentication authentication) {
+    public DefaultTimeoutAccessToken(String id, ExpirationPolicy expirationPolicy, Authentication<?> authentication) {
         super(id, expirationPolicy, authentication);
     }
 

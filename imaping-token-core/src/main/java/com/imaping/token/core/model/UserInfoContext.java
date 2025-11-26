@@ -3,7 +3,7 @@ package com.imaping.token.core.model;
 /**
  * @author miaoj
  */
-public interface UserInfoContext {
+public interface UserInfoContext<ID extends java.io.Serializable> {
 
     String BEAN_NAME = "userInfoContext";
 
@@ -12,5 +12,5 @@ public interface UserInfoContext {
      *
      * @return {@link UserInfo}
      */
-    UserInfo getCurrentUserInfo();
+    UserInfo<ID> getCurrentUserInfo();
 }

@@ -3,6 +3,8 @@ package com.imaping.token.core.util;
 import com.imaping.token.core.model.UserInfo;
 import com.imaping.token.core.model.UserInfoContext;
 
+import java.io.Serializable;
+
 /**
  * 安全上下文
  *
@@ -10,9 +12,9 @@ import com.imaping.token.core.model.UserInfoContext;
  */
 public class SecurityContextUtil {
 
-    private static UserInfoContext userInfoContext;
+    private static UserInfoContext<?> userInfoContext;
 
-    public void setUserInfoContext(UserInfoContext userInfoContext) {
+    public void setUserInfoContext(UserInfoContext<?> userInfoContext) {
         SecurityContextUtil.userInfoContext = userInfoContext;
     }
 
@@ -21,8 +23,10 @@ public class SecurityContextUtil {
      *
      * @return 当前用户信息
      */
-    public static UserInfo getCurrentUserInfo() {
-        return userInfoContext.getCurrentUserInfo();
+    @SuppressWarnings("unchecked")
+    public static <ID extends Serializable> UserInfo<ID> getCurrentUserInfo() {
+        // 通过泛型方法向调用方暴露具体 ID 类型,内部以通配符存储再做安全转换
+        return (UserInfo<ID>) userInfoContext.getCurrentUserInfo();
     }
 
     /**

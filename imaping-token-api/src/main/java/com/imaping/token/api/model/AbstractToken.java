@@ -72,9 +72,9 @@ public abstract class AbstractToken implements Token, AuthenticationAwareToken {
     private Boolean expired = Boolean.FALSE;
 
     @Getter
-    private Authentication authentication;
+    private Authentication<?> authentication;
 
-    protected AbstractToken(final String id, final ExpirationPolicy expirationPolicy, Authentication authentication) {
+    protected AbstractToken(final String id, final ExpirationPolicy expirationPolicy, Authentication<?> authentication) {
         this.id = id;
         this.creationTime = ZonedDateTime.now(expirationPolicy.getClock());
         this.lastTimeUsed = this.creationTime;

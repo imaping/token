@@ -23,7 +23,7 @@ import java.io.Serializable;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Authentication implements Serializable {
+public class Authentication<ID extends Serializable> implements Serializable {
 
     /**
      * 保留 serialVersionUID 以确保序列化兼容性.
@@ -32,5 +32,5 @@ public class Authentication implements Serializable {
     @Serial
     private static final long serialVersionUID = -6367266243088834065L;
 
-    private Principal principal;
+    private Principal<ID> principal;
 }

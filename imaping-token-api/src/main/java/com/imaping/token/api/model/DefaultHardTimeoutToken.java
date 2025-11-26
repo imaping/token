@@ -35,7 +35,7 @@ public class DefaultHardTimeoutToken extends AbstractToken implements HardTimeou
 
     private String code;
 
-    public DefaultHardTimeoutToken(String id, ExpirationPolicy expirationPolicy, Authentication authentication, String code, String description) {
+    public DefaultHardTimeoutToken(String id, ExpirationPolicy expirationPolicy, Authentication<?> authentication, String code, String description) {
         super(id, expirationPolicy, authentication);
         this.code = code;
         this.description = description;

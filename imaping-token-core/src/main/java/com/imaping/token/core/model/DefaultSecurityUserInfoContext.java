@@ -3,20 +3,20 @@ package com.imaping.token.core.model;
 /**
  * @author miaoj
  */
-public class DefaultSecurityUserInfoContext implements SecurityUserInfoContext {
+public class DefaultSecurityUserInfoContext implements SecurityUserInfoContext<String> {
 
-    private SecurityUserInfo securityUserInfo;
+    private SecurityUserInfo<String> securityUserInfo;
 
     public DefaultSecurityUserInfoContext() {
-        securityUserInfo = new SecurityUserInfo(false);
+        securityUserInfo = new SecurityUserInfo<>(false);
     }
 
     @Override
-    public SecurityUserInfo getCurrentUserInfo() {
+    public SecurityUserInfo<String> getCurrentUserInfo() {
         return securityUserInfo;
     }
 
-    public void setSecurityUserInfo(SecurityUserInfo securityUserInfo) {
+    public void setSecurityUserInfo(SecurityUserInfo<String> securityUserInfo) {
         this.securityUserInfo = securityUserInfo;
     }
 }

@@ -8,24 +8,26 @@ import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-public class TokenUserInfoContext implements UserInfoContext {
+public class TokenUserInfoContext implements UserInfoContext<String> {
 
     @Override
-    public UserInfo getCurrentUserInfo() {
+    public UserInfo<String> getCurrentUserInfo() {
         final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated() || authentication instanceof AnonymousAuthenticationToken) {
             //匿名用户
-            return new UserInfo(false);
+            return new UserInfo<>(false);
         } else {
             if (authentication instanceof DefaultTokenAuthentication) {
                 DefaultTokenAuthentication tokenAuthentication = (DefaultTokenAuthentication) authentication;
-                final BaseUserInfo baseUserInfo = tokenAuthentication.getAuthentication().getPrincipal().getUserInfo();
-                final UserInfo userInfo = new UserInfo(true);
+                @SuppressWarnings("unchecked")
+                final BaseUserInfo<String> baseUserInfo =
+                        (BaseUserInfo<String>) tokenAuthentication.getAuthentication().getPrincipal().getUserInfo();
+                final UserInfo<String> userInfo = new UserInfo<>(true);
                 BeanUtils.copyProperties(baseUserInfo, userInfo, UserInfo.class);
                 userInfo.setAccessToken(tokenAuthentication.getToken());
                 return userInfo;
             }
-            return new UserInfo(true);
+            return new UserInfo<>(true);
         }
     }
 }

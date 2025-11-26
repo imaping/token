@@ -107,7 +107,7 @@ public class TokenApiConfig {
 
     @Bean(name = UserInfoContext.BEAN_NAME)
     @ConditionalOnMissingBean(name = UserInfoContext.BEAN_NAME)
-    public UserInfoContext tokenUserInfoContext() {
+    public UserInfoContext<String> tokenUserInfoContext() {
         return new TokenUserInfoContext();
     }
 }

@@ -5,5 +5,5 @@ import com.imaping.token.api.model.TimeoutAccessToken;
 
 public interface TimeoutTokenFactory extends TokenFactory {
 
-    TimeoutAccessToken create(Authentication authentication);
+    TimeoutAccessToken create(Authentication<?> authentication);
 }

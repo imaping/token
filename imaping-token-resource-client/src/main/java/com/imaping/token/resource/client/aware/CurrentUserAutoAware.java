@@ -17,9 +17,9 @@ import java.util.Optional;
 @ConditionalOnClass(name = "org.springframework.data.jpa.repository.config.JpaRepositoriesRegistrar")
 public class CurrentUserAutoAware implements AuditorAware<String> {
 
-    private final UserInfoContext userInfoContext;
+    private final UserInfoContext<?> userInfoContext;
 
-    public CurrentUserAutoAware(UserInfoContext userInfoContext) {
+    public CurrentUserAutoAware(UserInfoContext<?> userInfoContext) {
         this.userInfoContext = userInfoContext;
     }
 

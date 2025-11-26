@@ -41,12 +41,11 @@ public class LoginController {
     @PostMapping("/login")
     public Object login(String username, String password) throws Exception {
         //todo: 自定义验证用户名密码，验证成功后根据用户信息生产token
-        final Authentication authentication = new Authentication(
-                Principal.builder()
+        final Authentication<String> authentication = new Authentication<>(
+                Principal.<String>builder()
                         .id(username)
                         .userInfo(
-                                BaseUserInfo
-                                        .builder()
+                                BaseUserInfo.<String>builder()
                                         .name("test")
                                         .build())
                         .build());

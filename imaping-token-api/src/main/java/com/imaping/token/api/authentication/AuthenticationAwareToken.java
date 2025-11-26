@@ -5,5 +5,5 @@ import com.imaping.token.api.model.Token;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)
 public interface AuthenticationAwareToken extends Token {
-    Authentication getAuthentication();
+    Authentication<?> getAuthentication();
 }

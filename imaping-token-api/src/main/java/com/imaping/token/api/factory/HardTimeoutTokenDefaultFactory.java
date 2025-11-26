@@ -20,13 +20,13 @@ public class HardTimeoutTokenDefaultFactory implements HardTimeoutTokenFactory {
 
 
     @Override
-    public HardTimeoutToken create(Authentication authentication, long timeToKillInSeconds, String code, String description) {
+    public HardTimeoutToken create(Authentication<?> authentication, long timeToKillInSeconds, String code, String description) {
         final ExpirationPolicy tokenExpirationPolicy = expirationPolicy.buildTokenExpirationPolicy(timeToKillInSeconds);
         return new DefaultHardTimeoutToken(idGenerator.getNewTokenId(HardTimeoutToken.PREFIX), tokenExpirationPolicy, authentication, code, description);
     }
 
     @Override
-    public HardTimeoutToken create(Authentication authentication) {
+    public HardTimeoutToken create(Authentication<?> authentication) {
         final ExpirationPolicy tokenExpirationPolicy = expirationPolicy.buildTokenExpirationPolicy();
         return new DefaultHardTimeoutToken(idGenerator.getNewTokenId(HardTimeoutToken.PREFIX), tokenExpirationPolicy, authentication, null, null);
     }

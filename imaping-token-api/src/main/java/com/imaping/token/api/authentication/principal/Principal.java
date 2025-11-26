@@ -24,7 +24,7 @@ import java.io.Serializable;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Principal implements Serializable {
+public class Principal<ID extends Serializable> implements Serializable {
     /**
      * 保留 serialVersionUID 以确保序列化兼容性.
      * Principal 对象随 Token 一起存储在 Redis 中.
@@ -34,5 +34,5 @@ public class Principal implements Serializable {
 
     private String id;
 
-    private BaseUserInfo userInfo;
+    private BaseUserInfo<ID> userInfo;
 }

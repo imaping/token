@@ -151,7 +151,8 @@ public abstract class AbstractTokenRegistry implements TokenRegistry {
     protected static String getPrincipalIdFrom(final Token token) {
         return token instanceof AuthenticationAwareToken
                 ? Optional.ofNullable(((AuthenticationAwareToken) token).getAuthentication())
-                .map(auth -> auth.getPrincipal().getId()).orElse("")
+                .map(auth -> auth.getPrincipal().getId())
+                .orElse("")
                 : "";
     }
 }

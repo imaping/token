@@ -19,7 +19,7 @@ public class TimeoutTokenDefaultFactory implements TimeoutTokenFactory {
     protected final ExpirationPolicyBuilder<TimeoutAccessToken> expirationPolicy;
 
     @Override
-    public TimeoutAccessToken create(Authentication authentication) {
+    public TimeoutAccessToken create(Authentication<?> authentication) {
         final ExpirationPolicy tokenExpirationPolicy = expirationPolicy.buildTokenExpirationPolicy();
         return new DefaultTimeoutAccessToken(idGenerator.getNewTokenId(TimeoutAccessToken.PREFIX), tokenExpirationPolicy, authentication);
     }
