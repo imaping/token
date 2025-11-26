@@ -25,9 +25,10 @@ public class CurrentUserAutoAware implements AuditorAware<String> {
 
     @Override
     public Optional<String> getCurrentAuditor() {
-        final UserInfo currentUserInfo = userInfoContext.getCurrentUserInfo();
+        final UserInfo<?> currentUserInfo = userInfoContext.getCurrentUserInfo();
         if (currentUserInfo.isAuthenticated()) {
-            return Optional.of(currentUserInfo.getId());
+            // 将泛型 ID 安全转换为字符串,用于审计字段
+            return Optional.of(String.valueOf(currentUserInfo.getId()));
         }
         return Optional.empty();
     }

@@ -26,7 +26,7 @@ import java.util.Set;
 @SuperBuilder
 @JsonIgnoreProperties(ignoreUnknown = true)
 @EqualsAndHashCode(of = "loginName")
-public class BaseUserInfo implements Serializable {
+public class BaseUserInfo<ID extends Serializable> implements Serializable {
 
     /**
      * 保留 serialVersionUID 以确保序列化兼容性.
@@ -39,7 +39,7 @@ public class BaseUserInfo implements Serializable {
      * 用户标识符
      */
     @JsonAlias({"id", "userId"})
-    protected String id;
+    protected ID id;
 
     /**
      * 当前登录用户的token

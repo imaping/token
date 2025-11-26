@@ -8,6 +8,7 @@ import lombok.experimental.SuperBuilder;
 import org.springframework.util.StringUtils;
 
 import java.io.Serial;
+import java.io.Serializable;
 
 /**
  * 用户信息类 - 扩展基础用户信息,包含认证状态和访问令牌.
@@ -24,7 +25,7 @@ import java.io.Serial;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-public class UserInfo extends BaseUserInfo {
+public class UserInfo<ID extends Serializable> extends BaseUserInfo<ID> {
 
     /**
      * 保留 serialVersionUID 以确保序列化兼容性.

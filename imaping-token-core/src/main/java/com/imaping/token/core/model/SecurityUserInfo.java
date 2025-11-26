@@ -7,6 +7,7 @@ import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 import java.io.Serial;
+import java.io.Serializable;
 
 /**
  * 安全用户信息类 - 扩展用户信息,包含安全相关属性(如管理员标识).
@@ -22,7 +23,7 @@ import java.io.Serial;
 @Setter
 @SuperBuilder
 @NoArgsConstructor
-public class SecurityUserInfo extends UserInfo {
+public class SecurityUserInfo<ID extends Serializable> extends UserInfo<ID> {
 
     /**
      * 保留 serialVersionUID 以确保序列化兼容性.
