@@ -43,7 +43,8 @@ public class TokenAuthenticationProvider implements AuthenticationProvider {
         updateTokenUsage(token);
         AuthenticationAwareToken authenticationAwareToken = (AuthenticationAwareToken) token;
         Set<String> roles = authenticationAwareToken.getAuthentication().getPrincipal().getUserInfo().getRoles();
-        Collection<SimpleGrantedAuthority> authorities = roles.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toCollection(() -> new ArrayList<>(roles.size())));
+        Collection<SimpleGrantedAuthority> authorities = null;
+        if (roles != null) authorities = roles.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toCollection(() -> new ArrayList<>(roles.size())));
         return new DefaultTokenAuthentication(authenticationAwareToken.getAuthentication(), tokenId, authorities);
     }
 
