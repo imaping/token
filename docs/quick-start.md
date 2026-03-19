@@ -2,7 +2,7 @@
 
 > **目标**: 在 30 分钟内理解 imaping-token 系统并运行第一个示例
 > **面向用户**: 新用户、开发者
-> **最后更新**: 2025-10-12
+> **最后更新**: 2026-03-19
 
 ---
 
@@ -170,11 +170,12 @@ imaping:
       inMemory:
         cache: true                        # 启用 Caffeine 缓存优化
         initialCapacity: 1000              # 初始容量
+      cleaner:
+        schedule:
+          enabled: true                    # 启用定时清理
+          repeatInterval: PT2M             # 清理间隔 2 分钟
     accessToken:
       timeToKillInSeconds: 7200            # Token 有效期 2 小时
-    scheduling:
-      enabled: true                        # 启用定时清理
-      repeatInterval: 120000               # 清理间隔 2 分钟
 ```
 
 ### 4.2 生产环境配置 (application-prod.yml)
@@ -210,11 +211,18 @@ imaping:
       redis:
         enabled: true                      # 启用 Redis 存储
       core:
-        enable-locking: true               # 启用分布式锁
+        enableLocking: true                # 启用 Redis 分布式锁
+      concurrentSessions:
+        enabled: true                      # 启用同账号并发会话控制
+        maxSessions: 1                     # 单账号只允许 1 个 TimeoutAccessToken 在线
+        overflowStrategy: INVALIDATE_OLDEST
+        enabledTokenTypes:
+          - TimeoutAccessToken
+      cleaner:
+        schedule:
+          enabled: false                   # Redis TTL 自动过期,无需定时清理
     accessToken:
       timeToKillInSeconds: 7200            # Token 有效期 2 小时
-    scheduling:
-      enabled: false                       # Redis 自动过期,无需定时清理
 ```
 
 ---
@@ -434,11 +442,12 @@ imaping:
     registry:
       redis:
         enabled: false
+      cleaner:
+        schedule:
+          enabled: true
+          repeatInterval: PT2M
     accessToken:
       timeToKillInSeconds: 7200
-    scheduling:
-      enabled: true
-      repeatInterval: 120000
 ```
 
 ### 5.3 运行应用
@@ -548,19 +557,33 @@ String userId = SecurityContextUtil.getUserId();
 String token = SecurityContextUtil.getCurrentToken();
 ```
 
-### Q4: 如何实现单点登录 (SSO)?
+### Q4: 如何实现单账号单登?
 
-**A**: imaping-token 支持分布式会话管理:
+**A**: 在需要受控的 Token 类型上开启并发会话控制即可。当前默认只控制 `TimeoutAccessToken`, `HardTimeoutToken` 默认不受影响。
 
-1. 使用 Redis 存储 (配置 `redis.enabled=true`)
-2. 多个应用实例共享同一个 Redis
-3. Token 在所有实例间自动同步
+```yaml
+imaping:
+  token:
+    registry:
+      redis:
+        enabled: true
+      core:
+        enableLocking: true
+      concurrentSessions:
+        enabled: true
+        maxSessions: 1
+        overflowStrategy: INVALIDATE_OLDEST
+        enabledTokenTypes:
+          - TimeoutAccessToken
+```
+
+多实例部署时必须让所有实例共享同一个 Redis,并保持 `enableLocking=true`,这样单账号单登才能在全局生效。
 
 ### Q5: Token 过期后会自动删除吗?
 
 **A**: 取决于存储后端:
 
-- **内存存储**: 需要定时清理任务 (`scheduling.enabled=true`)
+- **内存存储**: 需要定时清理任务 (`imaping.token.registry.cleaner.schedule.enabled=true`)
 - **Redis 存储**: 自动过期 (TTL 机制),无需定时清理
 
 ---

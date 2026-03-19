@@ -1,7 +1,7 @@
 # 配置参考
 
 > **快速参考**: imaping-token 完整配置项列表和使用指南
-> **最后更新**: 2025-10-12
+> **最后更新**: 2026-03-19
 > **版本**: 0.0.6-SNAPSHOT
 
 ---
@@ -14,7 +14,8 @@
   - [3.1 注册表核心配置](#31-注册表核心配置)
   - [3.2 内存注册表配置](#32-内存注册表配置)
   - [3.3 Redis 注册表配置](#33-redis-注册表配置)
-  - [3.4 注册表清理器配置](#34-注册表清理器配置)
+  - [3.4 并发会话控制配置](#34-并发会话控制配置)
+  - [3.5 注册表清理器配置](#35-注册表清理器配置)
 - [4. 访问令牌配置](#4-访问令牌配置)
 - [5. 调度配置](#5-调度配置)
 - [6. 配置场景示例](#6-配置场景示例)
@@ -103,10 +104,11 @@ Token 注册表 (TokenRegistry) 负责存储和管理 Token,支持内存和 Redi
 **配置说明:**
 
 - **enableLocking**:
-  - `true`: 启用分布式锁,Token 操作 (add/update/delete) 将被锁保护
-  - `false`: 禁用锁,适用于单机部署或对性能要求极高的场景
-  - Redis 注册表会使用 Redis 的分布式锁实现
-  - 内存注册表会使用 JVM 本地锁
+  - `true`: 启用注册表锁保护
+  - `false`: 禁用锁,适用于单机部署或明确接受并发竞争的场景
+  - `imaping.token.registry.redis.enabled=true` 且 `enableLocking=true` 时,框架会通过 `RedisLockRegistry` 提供 Redis 分布式锁
+  - 使用内存注册表且 `enableLocking=true` 时,只会使用 JVM 本地锁,不能跨实例保证同账号单登
+  - 多实例部署下如果要全局保证并发会话控制,必须同时启用 Redis 注册表和锁
 
 **使用场景:**
 
@@ -242,7 +244,60 @@ spring:
       password: ${REDIS_PASSWORD}  # 从环境变量读取密码
 ```
 
-### 3.4 注册表清理器配置
+### 3.4 并发会话控制配置
+
+并发会话控制用于限制同一账号在同一时刻允许存在的 Token 会话数量。该能力在 `TokenRegistry.addToken(...)` 写入前执行,属于框架级能力,不需要业务侧单独调用额外服务。
+
+| 配置项 | 类型 | 默认值 | 说明 | 示例 |
+|--------|------|--------|------|------|
+| `imaping.token.registry.concurrentSessions.enabled` | `boolean` | `false` | 是否启用同账号并发会话控制 | `true` |
+| `imaping.token.registry.concurrentSessions.maxSessions` | `int` | `1` | 同一账号允许同时在线的最大会话数 | `1` |
+| `imaping.token.registry.concurrentSessions.overflowStrategy` | `enum` | `INVALIDATE_OLDEST` | 超限处理策略: `INVALIDATE_OLDEST` 或 `DENY_NEW_LOGIN` | `DENY_NEW_LOGIN` |
+| `imaping.token.registry.concurrentSessions.enabledTokenTypes` | `List<String>` | `[TimeoutAccessToken]` | 需要启用并发控制的 Token 类型列表 | `[TimeoutAccessToken]` |
+
+**配置说明:**
+
+- **enabled**:
+  - `true`: 启用并发会话控制
+  - `false`: 不限制同账号在线会话数
+
+- **maxSessions**:
+  - 设置为 `1` 时表示单账号单登
+  - 大于 `1` 时表示允许同账号同时在线若干处
+  - 小于 `1` 会被视为非法配置并在写入 Token 时抛出异常
+
+- **overflowStrategy**:
+  - `INVALIDATE_OLDEST`: 删除当前账号最早创建的旧会话,为新登录让位
+  - `DENY_NEW_LOGIN`: 拒绝本次新登录,保留已有会话
+
+- **enabledTokenTypes**:
+  - 支持简单类名、完整类名,也支持按接口或父类匹配
+  - 默认仅 `TimeoutAccessToken` 生效
+  - `HardTimeoutToken` 默认不受影响,除非显式加入该列表
+
+**多实例说明:**
+
+- 单机内存注册表下,并发控制只能保证当前 JVM 内有效
+- 多实例部署下,必须同时启用 Redis 注册表和 `core.enableLocking=true`,这样才会通过 `RedisLockRegistry` 以分布式锁方式保证全局一致性
+
+**示例:**
+```yaml
+imaping:
+  token:
+    registry:
+      redis:
+        enabled: true
+      core:
+        enableLocking: true
+      concurrentSessions:
+        enabled: true
+        maxSessions: 1
+        overflowStrategy: INVALIDATE_OLDEST
+        enabledTokenTypes:
+          - TimeoutAccessToken
+```
+
+### 3.5 注册表清理器配置
 
 注册表清理器 (TokenRegistryCleaner) 负责定期清理过期的 Token。
 
@@ -413,7 +468,7 @@ imaping:
 | `imaping.token.registry.cleaner.schedule.repeatInterval` | `String` (Duration) | `"PT2M"` | 重复间隔 | `"PT5M"` |
 | `imaping.token.registry.cleaner.schedule.enabledOnHost` | `String` (Regex) | `".*"` | 主机名匹配模式 | `"node-.*"` |
 
-详细说明请参见 [3.4 注册表清理器配置](#34-注册表清理器配置)。
+详细说明请参见 [3.5 注册表清理器配置](#35-注册表清理器配置)。
 
 ---
 

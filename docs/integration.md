@@ -1,7 +1,7 @@
 # 集成指南
 
 > **快速参考**: imaping-token 系统集成步骤和部署配置
-> **最后更新**: 2025-10-12
+> **最后更新**: 2026-03-19
 > **适用版本**: 0.0.6-SNAPSHOT
 
 ---
@@ -1129,7 +1129,7 @@ server {
 
 ### 4.2 Redis 共享会话配置
 
-多实例部署时,**必须使用 Redis 存储**实现会话共享。
+多实例部署时,**必须使用 Redis 存储**实现会话共享。如果还要全局保证单账号单登或限制同账号在线处数,还必须启用注册表锁。
 
 #### 应用实例配置(所有实例相同)
 
@@ -1140,9 +1140,16 @@ imaping:
       redis:
         enabled: true              # ✅ 启用 Redis 共享存储
       core:
-        enable-locking: true       # ✅ 启用分布式锁(多实例必须)
-    scheduling:
-      enabled: false               # Redis 自动过期,无需定时清理
+        enableLocking: true        # ✅ 启用 Redis 分布式锁(多实例必须)
+      concurrentSessions:
+        enabled: true              # ✅ 启用同账号并发会话控制
+        maxSessions: 1             # 单账号单登
+        overflowStrategy: INVALIDATE_OLDEST
+        enabledTokenTypes:
+          - TimeoutAccessToken
+      cleaner:
+        schedule:
+          enabled: false           # Redis TTL 自动过期,无需定时清理
 
 spring:
   data:
@@ -1160,9 +1167,11 @@ spring:
 ```
 
 **关键配置说明**:
-- **`enable-locking: true`**: 多实例部署**必须启用**,防止并发冲突
-- **相同 Redis 配置**: 所有实例必须连接到同一个 Redis 服务器或集群
-- **相同 database 索引**: 确保所有实例使用同一个 Redis database
+- **`redis.enabled=true`**: 所有实例必须共享同一份 Token 存储
+- **`core.enableLocking=true`**: 多实例部署必须启用,框架会基于 `RedisLockRegistry` 获取分布式锁
+- **`concurrentSessions.*`**: 并发会话控制在 `TokenRegistry.addToken(...)` 时统一执行,不需要业务代码额外处理
+- **`enabledTokenTypes`**: 默认只控制 `TimeoutAccessToken`; `HardTimeoutToken` 默认不受影响
+- **相同 Redis 配置**: 所有实例必须连接到同一个 Redis 服务器或集群,并使用同一个 database 索引
 
 ---
 
@@ -1171,28 +1180,22 @@ spring:
 #### 为什么需要分布式锁?
 
 多实例场景下,可能出现以下并发冲突:
-1. **并发删除**: 多个实例同时删除同一个 Token
+1. **并发登录**: 两个实例同时为同一账号写入新 Token,导致单账号单登失效
 2. **并发更新**: 自动续期 Token 时,多个实例同时更新 `lastTimeUsed`
 3. **并发清理**: 多个实例同时执行过期 Token 清理
 
-#### 分布式锁配置
+#### 当前实现方式
 
-```yaml
-imaping:
-  token:
-    registry:
-      core:
-        enable-locking: true       # ✅ 启用分布式锁
-        lock-timeout: 5000         # 锁超时时间(毫秒),默认 5000
-        lock-retry-times: 3        # 锁获取重试次数,默认 3
-```
+- 当 `imaping.token.registry.redis.enabled=true` 且 `imaping.token.registry.core.enableLocking=true` 时,框架会创建 `RedisLockRegistry` 作为锁实现
+- 当 Redis 未启用但 `enableLocking=true` 时,只会退化为 JVM 本地锁,不能跨实例生效
+- 当 `enableLocking=false` 时,锁仓库为 no-op,不适合多实例下的全局并发会话控制
 
-**锁超时时间建议**:
-- 低并发: 5000ms(默认)
-- 中并发: 3000ms
-- 高并发: 2000ms
+#### 锁覆盖的核心场景
 
-⚠️ **注意**: 分布式锁会略微降低性能(约 5-10%),但多实例场景下必须启用。
+- `TokenRegistry.addToken(...)` 的并发会话控制
+- 注册表清理器执行过程中的互斥保护
+
+⚠️ **注意**: 当前没有额外暴露 `lock-timeout`、`lock-retry-times` 这类配置项。多实例部署如果需要全局单账号单登,请直接使用 Redis 注册表并开启 `core.enableLocking=true`。
 
 ---
 

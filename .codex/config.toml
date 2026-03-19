@@ -1,0 +1,10 @@
+[mcp_servers.idea-mcp]
+command = "C:\\Users\\miaoj\\AppData\\Local\\Programs\\IntelliJ IDEA Ultimate\\jbr\\bin\\java"
+args = [
+    "-classpath",
+    "C:\\Users\\miaoj\\AppData\\Local\\Programs\\IntelliJ IDEA Ultimate\\plugins\\mcpserver\\lib\\mcpserver-frontend.jar;C:\\Users\\miaoj\\AppData\\Local\\Programs\\IntelliJ IDEA Ultimate\\lib\\util-8.jar;C:\\Users\\miaoj\\AppData\\Local\\Programs\\IntelliJ IDEA Ultimate\\lib\\module-intellij.libraries.ktor.client.cio.jar;C:\\Users\\miaoj\\AppData\\Local\\Programs\\IntelliJ IDEA Ultimate\\lib\\module-intellij.libraries.ktor.client.jar;C:\\Users\\miaoj\\AppData\\Local\\Programs\\IntelliJ IDEA Ultimate\\lib\\module-intellij.libraries.ktor.network.tls.jar;C:\\Users\\miaoj\\AppData\\Local\\Programs\\IntelliJ IDEA Ultimate\\lib\\module-intellij.libraries.ktor.io.jar;C:\\Users\\miaoj\\AppData\\Local\\Programs\\IntelliJ IDEA Ultimate\\lib\\module-intellij.libraries.ktor.utils.jar;C:\\Users\\miaoj\\AppData\\Local\\Programs\\IntelliJ IDEA Ultimate\\lib\\module-intellij.libraries.kotlinx.io.jar;C:\\Users\\miaoj\\AppData\\Local\\Programs\\IntelliJ IDEA Ultimate\\lib\\module-intellij.libraries.kotlinx.serialization.core.jar;C:\\Users\\miaoj\\AppData\\Local\\Programs\\IntelliJ IDEA Ultimate\\lib\\module-intellij.libraries.kotlinx.serialization.json.jar",
+    "com.intellij.mcpserver.stdio.McpStdioRunnerKt"
+]
+
+[mcp_servers.idea-mcp.env]
+IJ_MCP_SERVER_PORT = "64343"

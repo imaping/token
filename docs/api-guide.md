@@ -1,7 +1,7 @@
 # API 使用指南
 
 > **快速参考**: imaping-token API 使用方法和扩展指南
-> **最后更新**: 2025-10-12
+> **最后更新**: 2026-03-19
 > **版本**: 0.0.6-SNAPSHOT
 
 ---
@@ -162,6 +162,27 @@ public class TokenService {
 - Token 必须先通过 `TokenFactory` 创建,再添加到注册表
 - `addToken()` 会抛出受检异常,必须处理
 - 支持批量添加 (使用 `Stream<Token>`)
+- 如果启用了 `imaping.token.registry.concurrentSessions.*`, `addToken()` 会在写入前执行同账号并发会话控制
+- 只有 `enabledTokenTypes` 命中的 Token 类型会受控,默认是 `TimeoutAccessToken`; `HardTimeoutToken` 默认不受影响
+
+**单账号单登配置示例:**
+```yaml
+imaping:
+  token:
+    registry:
+      redis:
+        enabled: true
+      core:
+        enableLocking: true
+      concurrentSessions:
+        enabled: true
+        maxSessions: 1
+        overflowStrategy: INVALIDATE_OLDEST
+        enabledTokenTypes:
+          - TimeoutAccessToken
+```
+
+多实例部署下,上面这组配置会让 `addToken()` 在写入前通过 Redis 分布式锁完成全局并发会话控制。
 
 ---
 
