@@ -16,6 +16,7 @@ import com.imaping.token.api.model.HardTimeoutToken;
 import com.imaping.token.api.model.TimeoutAccessToken;
 import com.imaping.token.api.model.Token;
 import com.imaping.token.api.registry.CachingTokenRegistry;
+import com.imaping.token.api.registry.ConcurrentSessionControlTokenRegistry;
 import com.imaping.token.api.registry.DefaultTokenRegistry;
 import com.imaping.token.api.registry.TokenRegistry;
 import com.imaping.token.core.TokenCoreAutoConfig;
@@ -94,15 +95,18 @@ public class TokenApiConfig {
 
     @ConditionalOnMissingBean(name = TokenRegistry.BEAN_NAME)
     @Bean
-    public TokenRegistry tokenRegistry(final IMapingConfigurationProperties properties) {
+    public TokenRegistry tokenRegistry(final IMapingConfigurationProperties properties,
+                                       @Qualifier(LockRepository.BEAN_NAME) final LockRepository lockRepository) {
         log.info("Runtime memory is used as the persistence storage for retrieving and managing tokens. "
                 + "Tokens that are issued during runtime will be LOST when the web server is restarted. This MAY impact SSO functionality.");
         val mem = properties.getToken().getRegistry().getInMemory();
-        if (mem.isCache()) {
-            return new CachingTokenRegistry();
-        }
-        val storageMap = new ConcurrentHashMap<String, Token>(mem.getInitialCapacity(), mem.getLoadFactor(), mem.getConcurrency());
-        return new DefaultTokenRegistry(storageMap);
+        final TokenRegistry delegate = mem.isCache()
+                ? new CachingTokenRegistry()
+                : new DefaultTokenRegistry(new ConcurrentHashMap<>(mem.getInitialCapacity(), mem.getLoadFactor(), mem.getConcurrency()));
+        return new ConcurrentSessionControlTokenRegistry(
+                delegate,
+                lockRepository,
+                properties.getToken().getRegistry().getConcurrentSessions());
     }
 
     @Bean(name = UserInfoContext.BEAN_NAME)

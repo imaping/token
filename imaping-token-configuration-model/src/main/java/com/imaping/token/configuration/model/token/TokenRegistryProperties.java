@@ -28,6 +28,12 @@ public class TokenRegistryProperties {
     private TokenRegistryCoreProperties core = new TokenRegistryCoreProperties();
 
     /**
+     * Settings relevant for concurrent session control.
+     */
+    @NestedConfigurationProperty
+    private ConcurrentSessionProperties concurrentSessions = new ConcurrentSessionProperties();
+
+    /**
      * Settings relevant for the default in-memory token registry.
      */
     @NestedConfigurationProperty
