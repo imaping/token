@@ -18,6 +18,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configurers.AuthorizeHttpRequestsConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -64,6 +65,7 @@ public class TokenSecurityConfig {
                 .sessionManagement(configurer -> configurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .securityMatcher(getAllAntMatchers())
                 .authorizeHttpRequests(registry -> {
+                    authorizeHttpRequests(registry);
                     if (!CollectionUtils.isEmpty(getAuthenticatedAntMatchersWithMethod())) {
                         getAuthenticatedAntMatchersWithMethod().forEach((method, antPatterns) -> {
                             registry.requestMatchers(method, antPatterns).authenticated();
@@ -90,6 +92,9 @@ public class TokenSecurityConfig {
                 .with(AuthenticationFilterDsl.custom(tokenAuthenticationEntryPoint(), properties), customizer -> {});
         configure(http);
         return http.build();
+    }
+
+    protected void authorizeHttpRequests(AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry registry) {
     }
 
     protected void configure(HttpSecurity http) {
