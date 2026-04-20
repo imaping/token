@@ -1,6 +1,7 @@
 package io.github.imaping.token.resource.client.config;
 
 import io.github.imaping.token.api.factory.TokenFactory;
+import io.github.imaping.token.api.jwt.AccessTokenCodec;
 import io.github.imaping.token.api.registry.TokenRegistry;
 import io.github.imaping.token.configuration.IMapingTokenConfigurationProperties;
 import org.junit.jupiter.api.Test;
@@ -28,7 +29,7 @@ class TokenSecurityConfigDefaultsTest {
 
     private static final class ExposedTokenSecurityConfig extends TokenSecurityConfig {
         private ExposedTokenSecurityConfig() {
-            super(mock(TokenRegistry.class), mock(TokenFactory.class), new IMapingTokenConfigurationProperties());
+            super(mock(TokenRegistry.class), mock(TokenFactory.class), mock(AccessTokenCodec.class), new IMapingTokenConfigurationProperties());
         }
 
         private Map<HttpMethod, String[]> permitMatchersWithMethod() {

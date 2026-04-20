@@ -1,6 +1,7 @@
 package io.github.imaping.token.resource.client.config;
 
 import io.github.imaping.token.api.factory.TokenFactory;
+import io.github.imaping.token.api.jwt.AccessTokenCodec;
 import io.github.imaping.token.api.registry.TokenRegistry;
 import io.github.imaping.token.configuration.IMapingTokenConfigurationProperties;
 import io.github.imaping.token.resource.client.authentication.TokenAuthenticationEntryPoint;
@@ -36,19 +37,24 @@ public class TokenSecurityConfig {
     private final TokenRegistry tokenRegistry;
 
     private final TokenFactory tokenFactory;
+    private final AccessTokenCodec accessTokenCodec;
 
     private final IMapingTokenConfigurationProperties properties;
 
 
-    public TokenSecurityConfig(TokenRegistry tokenRegistry, @Qualifier(TokenFactory.BEAN_NAME) TokenFactory tokenFactory, IMapingTokenConfigurationProperties properties) {
+    public TokenSecurityConfig(TokenRegistry tokenRegistry,
+                               @Qualifier(TokenFactory.BEAN_NAME) TokenFactory tokenFactory,
+                               @Qualifier(AccessTokenCodec.BEAN_NAME) AccessTokenCodec accessTokenCodec,
+                               IMapingTokenConfigurationProperties properties) {
         this.tokenRegistry = tokenRegistry;
         this.tokenFactory = tokenFactory;
+        this.accessTokenCodec = accessTokenCodec;
         this.properties = properties;
     }
 
     @Bean
     public TokenAuthenticationProvider tokenAuthenticationProvider() {
-        return new TokenAuthenticationProvider(tokenRegistry);
+        return new TokenAuthenticationProvider(tokenRegistry, accessTokenCodec);
     }
 
     @Bean

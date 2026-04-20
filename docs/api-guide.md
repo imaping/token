@@ -710,6 +710,60 @@ public class TokenStatisticsService {
 
 ---
 
+### 2.7 Refresh Token 续签
+
+当前版本内置 `TokenRefreshService`,用于签发 `AccessToken + RefreshToken` 并在刷新时轮换旧 RefreshToken。
+
+**核心流程:**
+
+1. 登录成功后调用 `tokenRefreshService.issue(authentication)`
+2. 返回 `TokenGrant`,其中包含 `accessToken` 与 `refreshToken`
+3. 调用 `/refresh` 或直接调用 `tokenRefreshService.refresh(refreshTokenId)`
+4. 框架会撤销旧 AccessToken 和旧 RefreshToken,再签发一对新的 Token
+
+**示例:**
+
+```java
+@RestController
+@RequiredArgsConstructor
+public class LoginController {
+
+    private final TokenRefreshService tokenRefreshService;
+
+    @PostMapping("/login")
+    public TokenGrant login(Authentication<?> authentication) throws Exception {
+        return tokenRefreshService.issue(authentication);
+    }
+
+    @PostMapping("/refresh")
+    public TokenGrant refresh(@RequestParam String refreshToken) throws Exception {
+        return tokenRefreshService.refresh(refreshToken);
+    }
+}
+```
+
+**关键点:**
+
+- RefreshToken 不可直接用于访问业务接口
+- RefreshToken 使用固定时长过期策略,不会滑动续期
+- 刷新成功后旧 RefreshToken 会立即失效
+- 当前默认支持通过独立 `HttpOnly` Cookie `refresh_token` 自动读取续签
+
+---
+
+### 2.8 JWT AccessToken
+
+当前版本支持通过 `imaping.token.accessToken.createAsJwt=true` 将 AccessToken 编码为 JWT 字符串。
+
+**关键点:**
+
+- JWT AccessToken 通过 HS256 签名校验
+- JWT 中会携带注册表 tokenId(`jti`),认证时先验签,再回查注册表
+- 这样可以兼容现有的注销、会话管理、并发会话控制和 refresh token 轮换
+- 当前实现仍建议配合服务端注册表使用,不是完全无状态模式
+
+---
+
 ## 3. TokenFactory 使用
 
 `TokenFactory` 负责创建 Token 实例。
@@ -1189,45 +1243,29 @@ package com.example.token.factory;
 import com.example.token.model.DefaultRefreshToken;
 import com.example.token.model.RefreshToken;
 import io.github.imaping.token.api.authentication.Authentication;
-import io.github.imaping.token.api.expiration.ExpirationPolicy;
-import io.github.imaping.token.api.expiration.HardTimeoutExpirationPolicy;
-import io.github.imaping.token.api.factory.TokenFactory;
+import io.github.imaping.token.api.factory.RefreshTokenFactory;
 import io.github.imaping.token.api.generator.UniqueTokenIdGenerator;
-import io.github.imaping.token.api.model.Token;
+import io.github.imaping.token.configuration.IMapingTokenConfigurationProperties;
 import lombok.RequiredArgsConstructor;
 
-import java.time.Clock;
+import java.time.Duration;
 
 /**
  * RefreshToken 工厂
  */
 @RequiredArgsConstructor
-public class RefreshTokenFactory implements TokenFactory {
+public class CustomRefreshTokenFactory implements RefreshTokenFactory {
 
     private final UniqueTokenIdGenerator tokenIdGenerator;
-    private final long timeToLiveInSeconds;  // RefreshToken 有效期 (如 30 天)
+    private final IMapingTokenConfigurationProperties properties;
 
     @Override
-    public Class<? extends Token> getTokenType() {
+    public Class<? extends io.github.imaping.token.api.model.Token> getTokenType() {
         return RefreshToken.class;
     }
 
-    /**
-     * 创建 RefreshToken
-     *
-     * @param authentication 认证信息
-     * @return RefreshToken
-     */
     public Token createToken(Authentication authentication) {
-        String tokenId = tokenIdGenerator.getNewTokenId(DefaultRefreshToken.PREFIX);
-
-        // 创建固定时间过期策略 (RefreshToken 不自动续期)
-        ExpirationPolicy expirationPolicy = new HardTimeoutExpirationPolicy(
-                timeToLiveInSeconds,
-                Clock.systemUTC()
-        );
-
-        return new DefaultRefreshToken(tokenId, expirationPolicy, authentication);
+        throw new UnsupportedOperationException("请使用 create(authentication, accessTokenId)");
     }
 
     /**
@@ -1237,10 +1275,15 @@ public class RefreshTokenFactory implements TokenFactory {
      * @param accessTokenId 关联的 AccessToken ID
      * @return RefreshToken
      */
-    public RefreshToken createToken(Authentication authentication, String accessTokenId) {
-        DefaultRefreshToken refreshToken = (DefaultRefreshToken) createToken(authentication);
-        refreshToken.setAccessTokenId(accessTokenId);
-        return refreshToken;
+    @Override
+    public RefreshToken create(Authentication authentication, String accessTokenId) {
+        Duration ttl = Duration.parse(properties.getRefreshToken().getTimeToKillInSeconds());
+        return new DefaultRefreshToken(
+                tokenIdGenerator.getNewTokenId(DefaultRefreshToken.PREFIX),
+                new io.github.imaping.token.api.expiration.HardTimeoutExpirationPolicy(ttl.getSeconds()),
+                authentication,
+                accessTokenId
+        );
     }
 }
 ```
@@ -1250,11 +1293,11 @@ public class RefreshTokenFactory implements TokenFactory {
 ```java
 package com.example.config;
 
-import com.example.token.factory.RefreshTokenFactory;
+import com.example.token.factory.CustomRefreshTokenFactory;
 import com.example.token.model.RefreshToken;
 import io.github.imaping.token.api.factory.DefaultTokenFactory;
 import io.github.imaping.token.api.generator.UniqueTokenIdGenerator;
-import org.springframework.beans.factory.annotation.Value;
+import io.github.imaping.token.configuration.IMapingTokenConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -1265,11 +1308,10 @@ public class RefreshTokenConfig {
      * 注册 RefreshTokenFactory
      */
     @Bean
-    public RefreshTokenFactory refreshTokenFactory(
+    public CustomRefreshTokenFactory refreshTokenFactory(
             UniqueTokenIdGenerator tokenIdGenerator,
-            @Value("${imaping.token.refreshToken.timeToLiveInSeconds:2592000}") long timeToLiveInSeconds) {
-        // 默认 30 天 (2592000 秒)
-        return new RefreshTokenFactory(tokenIdGenerator, timeToLiveInSeconds);
+            IMapingTokenConfigurationProperties properties) {
+        return new CustomRefreshTokenFactory(tokenIdGenerator, properties);
     }
 
     /**
@@ -1278,7 +1320,7 @@ public class RefreshTokenConfig {
     @Bean
     public DefaultTokenFactory defaultTokenFactory(
             DefaultTokenFactory defaultTokenFactory,
-            RefreshTokenFactory refreshTokenFactory) {
+            CustomRefreshTokenFactory refreshTokenFactory) {
 
         defaultTokenFactory.addTokenFactory(RefreshToken.class, refreshTokenFactory);
         return defaultTokenFactory;

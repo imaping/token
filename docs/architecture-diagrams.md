@@ -114,6 +114,22 @@ classDiagram
         +getId() String
     }
 
+    class DefaultJwtAccessToken {
+        -PREFIX = "AT"
+        +getId() String
+    }
+
+    class RefreshToken {
+        <<interface>>
+        +getAccessTokenId() String
+    }
+
+    class DefaultRefreshToken {
+        -PREFIX = "RT"
+        -accessTokenId String
+        +getId() String
+    }
+
     class HardTimeoutToken {
         <<interface>>
         +getCode() String
@@ -129,8 +145,11 @@ classDiagram
 
     Token <|.. AbstractToken
     AbstractToken <|-- TimeoutAccessToken
+    AbstractToken <|-- RefreshToken
     AbstractToken <|-- HardTimeoutToken
     TimeoutAccessToken <|.. DefaultTimeoutAccessToken
+    TimeoutAccessToken <|.. DefaultJwtAccessToken
+    RefreshToken <|.. DefaultRefreshToken
     HardTimeoutToken <|.. DefaultHardTimeoutToken
 
     AbstractToken o-- ExpirationPolicy
@@ -145,14 +164,15 @@ classDiagram
 
     class Authentication {
         -principal Principal
-        -attributes Map
     }
 ```
 
 **关键点**:
 - `Token`: 顶层接口,定义基本契约
 - `AbstractToken`: 抽象基类,封装通用逻辑
-- `DefaultTimeoutAccessToken`: 自动续期 Token (PREFIX="AT")
+- `DefaultTimeoutAccessToken`: 自动续期 AccessToken (PREFIX="AT")
+- `DefaultJwtAccessToken`: JWT 模式下的 AccessToken 实体,客户端看到的是 JWT 字符串
+- `DefaultRefreshToken`: 固定时长的 RefreshToken,用于 AccessToken 续签与轮换
 - `DefaultHardTimeoutToken`: 固定时间 Token (PREFIX="ATT")
 
 ---
@@ -631,10 +651,10 @@ graph TB
     end
 
     subgraph "默认实现"
-        DToken[DefaultTimeoutAccessToken<br/>DefaultHardTimeoutToken]
+        DToken[DefaultTimeoutAccessToken<br/>DefaultJwtAccessToken<br/>DefaultRefreshToken<br/>DefaultHardTimeoutToken]
         DRegistry[DefaultTokenRegistry<br/>RedisTokenRegistry]
-        DFactory[TimeoutTokenDefaultFactory<br/>HardTimeoutTokenDefaultFactory]
-        DPolicy[TimeoutExpirationPolicy<br/>HardTimeoutExpirationPolicy]
+        DFactory[TimeoutTokenDefaultFactory<br/>RefreshTokenDefaultFactory<br/>HardTimeoutTokenDefaultFactory]
+        DPolicy[TimeoutExpirationPolicy<br/>HardTimeoutExpirationPolicy<br/>AccessTokenCodec]
     end
 
     subgraph "自定义实现 (用户扩展)"
@@ -674,7 +694,7 @@ graph TB
 1. **Token**: 自定义 Token 类型 (如 RefreshToken)
 2. **TokenRegistry**: 自定义存储后端 (如数据库)
 3. **TokenFactory**: 自定义 Token 创建逻辑
-4. **ExpirationPolicy**: 自定义过期策略 (如滑动窗口)
+4. **ExpirationPolicy / AccessTokenCodec**: 自定义过期策略或 AccessToken 编解码策略
 
 ---
 

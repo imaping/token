@@ -2,23 +2,25 @@ package io.github.imaping.token.test.web;
 
 import io.github.imaping.token.api.authentication.Authentication;
 import io.github.imaping.token.api.authentication.principal.Principal;
-import io.github.imaping.token.api.factory.TimeoutTokenFactory;
-import io.github.imaping.token.api.factory.TokenFactory;
-import io.github.imaping.token.api.model.TimeoutAccessToken;
-import io.github.imaping.token.api.model.Token;
+import io.github.imaping.token.api.refresh.TokenGrant;
+import io.github.imaping.token.api.refresh.TokenRefreshService;
 import io.github.imaping.token.api.registry.TokenRegistry;
 import io.github.imaping.token.configuration.IMapingTokenConfigurationProperties;
 import io.github.imaping.token.core.model.BaseUserInfo;
 import io.github.imaping.token.core.util.SecurityContextUtil;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
+import org.springframework.web.util.WebUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.util.StringUtils;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
+import java.time.Duration;
+import java.time.ZonedDateTime;
 
 /**
  * 不使用单点登录，自定义登录
@@ -27,15 +29,14 @@ import jakarta.servlet.http.HttpServletResponse;
 public class LoginController {
 
     private final TokenRegistry tokenRegistry;
-
-    private final TokenFactory tokenFactory;
+    private final TokenRefreshService tokenRefreshService;
     private final IMapingTokenConfigurationProperties properties;
 
-    public LoginController(@Qualifier(TokenRegistry.BEAN_NAME) TokenRegistry tokenRegistry,
-                           @Qualifier(TokenFactory.BEAN_NAME) TokenFactory tokenFactory,
+    public LoginController(final TokenRegistry tokenRegistry,
+                           final TokenRefreshService tokenRefreshService,
                            IMapingTokenConfigurationProperties properties) {
         this.tokenRegistry = tokenRegistry;
-        this.tokenFactory = tokenFactory;
+        this.tokenRefreshService = tokenRefreshService;
         this.properties = properties;
     }
 
@@ -54,28 +55,77 @@ public class LoginController {
                         .id(username)
                         .userInfo(
                                 BaseUserInfo.<String>builder()
+                                        .id(username)
                                         .name("test")
+                                        .loginName(username)
                                         .build())
                         .build());
-        final TimeoutTokenFactory factory = (TimeoutTokenFactory) tokenFactory.get(TimeoutAccessToken.class);
-        Token token = factory.create(authentication);
-        tokenRegistry.addToken(token);
-        writeTokenCookie(response, token.getId(), -1);
-        return token;
+        TokenGrant grant = tokenRefreshService.issue(authentication);
+        writeAccessTokenCookie(response, grant.getAccessToken(), -1);
+        writeRefreshTokenCookie(response, grant.getRefreshToken(), grant.getRefreshTokenExpiresAt());
+        return grant;
+    }
+
+    @PostMapping("/refresh")
+    public Object refresh(String refreshToken, HttpServletRequest request, HttpServletResponse response) throws Exception {
+        TokenGrant grant = tokenRefreshService.refresh(resolveRefreshToken(refreshToken, request));
+        writeAccessTokenCookie(response, grant.getAccessToken(), -1);
+        writeRefreshTokenCookie(response, grant.getRefreshToken(), grant.getRefreshTokenExpiresAt());
+        return grant;
     }
 
     @PostMapping("/logout")
-    public Object logout(HttpServletResponse response) throws Exception {
+    public Object logout(String refreshToken, HttpServletRequest request, HttpServletResponse response) throws Exception {
         //前端删除token、后端删除token 即可
-        final String currentToken = SecurityContextUtil.getCurrentToken();
-        tokenRegistry.deleteToken(currentToken);
-        writeTokenCookie(response, "", 0);
-        return true;
+        long deleted = 0;
+        final String resolvedRefreshToken = resolveRefreshToken(refreshToken, request);
+        if (StringUtils.hasText(resolvedRefreshToken)) {
+            deleted = tokenRefreshService.revokeGrant(resolvedRefreshToken);
+        } else if (StringUtils.hasText(SecurityContextUtil.getCurrentTokenId())) {
+            deleted = tokenRegistry.deleteToken(SecurityContextUtil.getCurrentTokenId());
+        }
+        writeAccessTokenCookie(response, "", 0);
+        clearRefreshTokenCookie(response);
+        return deleted > 0;
     }
 
-    private void writeTokenCookie(final HttpServletResponse response, final String tokenValue, final long maxAgeSeconds) {
+    private String resolveRefreshToken(final String refreshToken, final HttpServletRequest request) {
+        if (StringUtils.hasText(refreshToken)) {
+            return refreshToken;
+        }
+        Cookie cookie = WebUtils.getCookie(request, properties.getRefreshToken().getCookieName());
+        return cookie != null ? cookie.getValue() : null;
+    }
+
+    private void writeAccessTokenCookie(final HttpServletResponse response, final String tokenValue, final long maxAgeSeconds) {
         final var cookieProperties = properties.getAccessToken().getCookie();
-        ResponseCookie.ResponseCookieBuilder builder = ResponseCookie.from(properties.getAccessTokenName(), tokenValue)
+        response.addHeader(HttpHeaders.SET_COOKIE, buildCookie(properties.getAccessTokenName(), tokenValue, maxAgeSeconds, cookieProperties).toString());
+    }
+
+    private void writeRefreshTokenCookie(final HttpServletResponse response,
+                                         final String refreshTokenValue,
+                                         final ZonedDateTime refreshTokenExpiresAt) {
+        if (!properties.getRefreshToken().isEnabled() || !StringUtils.hasText(refreshTokenValue)) {
+            clearRefreshTokenCookie(response);
+            return;
+        }
+        long maxAgeSeconds = Math.max(Duration.between(ZonedDateTime.now(refreshTokenExpiresAt.getZone()), refreshTokenExpiresAt).getSeconds(), 0);
+        final var cookieProperties = properties.getRefreshToken().getCookie();
+        response.addHeader(HttpHeaders.SET_COOKIE,
+                buildCookie(properties.getRefreshToken().getCookieName(), refreshTokenValue, maxAgeSeconds, cookieProperties).toString());
+    }
+
+    private void clearRefreshTokenCookie(final HttpServletResponse response) {
+        final var cookieProperties = properties.getRefreshToken().getCookie();
+        response.addHeader(HttpHeaders.SET_COOKIE,
+                buildCookie(properties.getRefreshToken().getCookieName(), "", 0, cookieProperties).toString());
+    }
+
+    private ResponseCookie buildCookie(final String name,
+                                       final String tokenValue,
+                                       final long maxAgeSeconds,
+                                       final io.github.imaping.token.configuration.model.token.TokenCookieProperties cookieProperties) {
+        ResponseCookie.ResponseCookieBuilder builder = ResponseCookie.from(name, tokenValue)
                 .path(cookieProperties.getPath())
                 .httpOnly(cookieProperties.isHttpOnly())
                 .secure(cookieProperties.isSecure())
@@ -86,6 +136,6 @@ public class LoginController {
         if (StringUtils.hasText(cookieProperties.getSameSite())) {
             builder.sameSite(cookieProperties.getSameSite());
         }
-        response.addHeader(HttpHeaders.SET_COOKIE, builder.build().toString());
+        return builder.build();
     }
 }

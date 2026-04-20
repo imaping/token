@@ -1,6 +1,7 @@
 package io.github.imaping.token.test.config;
 
 import io.github.imaping.token.api.factory.TokenFactory;
+import io.github.imaping.token.api.jwt.AccessTokenCodec;
 import io.github.imaping.token.api.registry.TokenRegistry;
 import io.github.imaping.token.configuration.IMapingTokenConfigurationProperties;
 import io.github.imaping.token.resource.client.config.TokenSecurityConfig;
@@ -19,14 +20,17 @@ import java.util.Map;
 @Configuration
 public class TestSecurityConfigurerAdapter extends TokenSecurityConfig {
 
-    public TestSecurityConfigurerAdapter(TokenRegistry tokenRegistry, @Qualifier(TokenFactory.BEAN_NAME) TokenFactory tokenFactory, IMapingTokenConfigurationProperties properties) {
-        super(tokenRegistry, tokenFactory, properties);
+    public TestSecurityConfigurerAdapter(TokenRegistry tokenRegistry,
+                                         @Qualifier(TokenFactory.BEAN_NAME) TokenFactory tokenFactory,
+                                         @Qualifier(AccessTokenCodec.BEAN_NAME) AccessTokenCodec accessTokenCodec,
+                                         IMapingTokenConfigurationProperties properties) {
+        super(tokenRegistry, tokenFactory, accessTokenCodec, properties);
     }
 
 
     @Override
     protected String[] getPermitAntMatchers() {
-        return new String[]{"/login", "/logout"};
+        return new String[]{"/login", "/logout", "/refresh"};
     }
 
     @Override

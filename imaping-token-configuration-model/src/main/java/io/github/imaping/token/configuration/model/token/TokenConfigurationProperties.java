@@ -25,6 +25,8 @@ public class TokenConfigurationProperties {
     @NestedConfigurationProperty
     private AccessTokenProperties accessToken = new AccessTokenProperties();
 
+    @NestedConfigurationProperty
+    private RefreshTokenProperties refreshToken = new RefreshTokenProperties();
 
     /**
      * token使用名称，防止部署在同一个域名下系统token冲突

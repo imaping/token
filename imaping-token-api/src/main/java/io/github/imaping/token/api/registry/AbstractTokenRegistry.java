@@ -3,7 +3,7 @@ package io.github.imaping.token.api.registry;
 import io.github.imaping.token.api.authentication.AuthenticationAwareToken;
 import io.github.imaping.token.api.exception.TokenAuthenticationException;
 import io.github.imaping.token.api.exception.TokenError;
-import io.github.imaping.token.api.model.DefaultTimeoutAccessToken;
+import io.github.imaping.token.api.model.TimeoutAccessToken;
 import io.github.imaping.token.api.model.Token;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
@@ -60,7 +60,7 @@ public abstract class AbstractTokenRegistry implements TokenRegistry {
 
     @Override
     public long sessionCount() {
-        try (Stream<?> stream = stream().filter(DefaultTimeoutAccessToken.class::isInstance)) {
+        try (Stream<?> stream = stream().filter(TimeoutAccessToken.class::isInstance)) {
             return stream.count();
         } catch (final Exception t) {
             log.trace("sessionCount() operation is not implemented by the token registry instance [{}]. "
@@ -72,8 +72,8 @@ public abstract class AbstractTokenRegistry implements TokenRegistry {
     @Override
     public long countSessionsFor(final String principalId) {
         val tokenPredicate = (Predicate<Token>) t -> {
-            if (t instanceof DefaultTimeoutAccessToken) {
-                val token = DefaultTimeoutAccessToken.class.cast(t);
+            if (t instanceof TimeoutAccessToken && t instanceof AuthenticationAwareToken) {
+                val token = AuthenticationAwareToken.class.cast(t);
                 return token.getAuthentication().getPrincipal().getId().equalsIgnoreCase(principalId);
             }
             return false;

@@ -17,12 +17,13 @@
   - [3.4 并发会话控制配置](#34-并发会话控制配置)
   - [3.5 注册表清理器配置](#35-注册表清理器配置)
 - [4. 访问令牌配置](#4-访问令牌配置)
-- [5. 调度配置](#5-调度配置)
-- [6. 配置场景示例](#6-配置场景示例)
-  - [6.1 开发环境配置](#61-开发环境配置)
-  - [6.2 生产环境配置](#62-生产环境配置)
-  - [6.3 集群部署配置](#63-集群部署配置)
-  - [6.4 性能优化配置](#64-性能优化配置)
+- [5. Refresh Token 配置](#5-refresh-token-配置)
+- [6. 调度配置](#6-调度配置)
+- [7. 配置场景示例](#7-配置场景示例)
+  - [7.1 开发环境配置](#71-开发环境配置)
+  - [7.2 生产环境配置](#72-生产环境配置)
+  - [7.3 集群部署配置](#73-集群部署配置)
+  - [7.4 性能优化配置](#74-性能优化配置)
 
 ---
 
@@ -411,7 +412,11 @@ imaping:
 | 配置项 | 类型 | 默认值 | 说明 | 示例 |
 |--------|------|--------|------|------|
 | `imaping.token.accessToken.timeToKillInSeconds` | `String` (Duration) | `"PT2H"` | Token 过期时间 (ISO-8601 格式)。Token 创建后多久过期 | `"PT4H"` |
-| `imaping.token.accessToken.createAsJwt` | `boolean` | `false` | 是否创建为 JWT 格式的 Token。当前版本尚未实现,保留配置项 | `false` |
+| `imaping.token.accessToken.createAsJwt` | `boolean` | `false` | 是否将 AccessToken 编码为 JWT 字符串 | `true` |
+| `imaping.token.accessToken.jwt.issuer` | `String` | `"imaping-token"` | JWT `iss` 声明 | `"my-auth-server"` |
+| `imaping.token.accessToken.jwt.audience` | `String` | `"imaping-token-resource"` | JWT `aud` 声明 | `"my-api"` |
+| `imaping.token.accessToken.jwt.secret` | `String` | 内置开发密钥 | HS256 签名密钥,生产环境必须覆盖 | `"replace-with-strong-secret"` |
+| `imaping.token.accessToken.jwt.allowedClockSkewSeconds` | `long` | `30` | JWT 校验时允许的时钟偏移秒数 | `60` |
 
 **配置说明:**
 
@@ -422,9 +427,16 @@ imaping:
   - 使用 ISO-8601 Duration 格式 (如 `PT2H` 表示 2 小时)
 
 - **createAsJwt**:
-  - 当前版本 (0.0.1) 尚未实现 JWT 支持
-  - 保留配置项,计划在未来版本中实现
-  - 目前请保持默认值 `false`
+  - `false`: AccessToken 直接使用注册表中的 tokenId
+  - `true`: AccessToken 返回为签名后的 JWT 字符串
+  - 当前实现会保留服务端注册表记录,用于注销、会话管理和 refresh token 续签
+  - JWT 模式下客户端看到的是 JWT,服务端内部仍以注册表 tokenId 作为会话主键
+
+- **jwt.\***:
+  - `issuer` / `audience`: 用于生成和校验标准 JWT 声明
+  - `secret`: HS256 对称签名密钥,生产环境必须替换默认值
+  - `allowedClockSkewSeconds`: 校验 `exp` 时允许的时钟漂移
+  - 当 `createAsJwt=true` 时,如果仍使用默认开发密钥或密钥长度不足 32 字节,应用会在启动时直接失败
 
 **使用场景:**
 
@@ -451,11 +463,64 @@ imaping:
   token:
         accessToken:
           timeToKillInSeconds: PT30M
+
+# 场景 4: JWT AccessToken
+imaping:
+  token:
+        accessToken:
+          createAsJwt: true
+          jwt:
+            issuer: my-auth-server
+            audience: my-api
+            secret: replace-with-strong-secret
 ```
 
 ---
 
-## 5. 调度配置
+## 5. Refresh Token 配置
+
+Refresh Token 用于续签 AccessToken。当前实现默认启用,并在刷新时轮换旧 RefreshToken。
+
+| 配置项 | 类型 | 默认值 | 说明 | 示例 |
+|--------|------|--------|------|------|
+| `imaping.token.refreshToken.enabled` | `boolean` | `true` | 是否启用 RefreshToken 机制 | `true` |
+| `imaping.token.refreshToken.timeToKillInSeconds` | `String` (Duration) | `"P30D"` | RefreshToken 固定有效期 | `"P14D"` |
+| `imaping.token.refreshToken.cookieName` | `String` | `"refresh_token"` | RefreshToken Cookie 名称 | `"admin_refresh_token"` |
+| `imaping.token.refreshToken.cookie.httpOnly` | `boolean` | `true` | 是否启用 HttpOnly | `true` |
+| `imaping.token.refreshToken.cookie.secure` | `boolean` | `false` | 是否仅允许 HTTPS 发送 | `true` |
+| `imaping.token.refreshToken.cookie.sameSite` | `String` | `"Strict"` | SameSite 策略 | `"Lax"` |
+
+**配置说明:**
+
+- **enabled**:
+  - `true`: 登录成功时签发 RefreshToken,`/refresh` 可用于续签
+  - `false`: 只签发 AccessToken,不会生成 RefreshToken
+
+- **timeToKillInSeconds**:
+  - RefreshToken 使用固定时长过期策略,不会因为访问资源而续期
+  - `/refresh` 成功后会撤销旧 RefreshToken 并签发新的 RefreshToken
+
+- **cookieName / cookie.\***:
+  - RefreshToken 默认写入独立的 `HttpOnly` Cookie
+  - 推荐生产环境开启 `secure=true`,并按业务域名配置 `domain`
+
+**示例:**
+```yaml
+imaping:
+  token:
+    refreshToken:
+      enabled: true
+      timeToKillInSeconds: P14D
+      cookieName: refresh_token
+      cookie:
+        httpOnly: true
+        secure: true
+        sameSite: Strict
+```
+
+---
+
+## 6. 调度配置
 
 调度配置 (SchedulingProperties) 用于控制定时任务的执行,目前主要用于清理器。
 
@@ -472,9 +537,9 @@ imaping:
 
 ---
 
-## 6. 配置场景示例
+## 7. 配置场景示例
 
-### 6.1 开发环境配置
+### 7.1 开发环境配置
 
 **特点**: 单机部署、快速启动、无外部依赖、自动清理
 
@@ -522,7 +587,7 @@ logging:
     imaping.token: DEBUG
 ```
 
-### 6.2 生产环境配置
+### 7.2 生产环境配置
 
 **特点**: Redis 存储、分布式锁、持久化、高可用
 
@@ -579,7 +644,7 @@ logging:
     imaping.token: INFO
 ```
 
-### 6.3 集群部署配置
+### 7.3 集群部署配置
 
 **特点**: Redis Cluster、多节点、指定清理节点
 
@@ -642,7 +707,7 @@ logging:
     io.github.imaping.token.api.registry: DEBUG  # 注册表操作日志
 ```
 
-### 6.4 性能优化配置
+### 7.4 性能优化配置
 
 **特点**: 调优 Redis 连接池、调整并发参数、优化过期时间
 

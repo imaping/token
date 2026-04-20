@@ -287,9 +287,10 @@ public class AdvancedSecurityConfig {
 
 #### Token 提取优先级
 
-1. **HTTP Header** (最高优先级): `Authorization: Bearer <token>`
-2. **Cookie**: `access_token=<token>` (Cookie 名称可配置)
-3. **Request Parameter** (最低优先级): `?access_token=<token>`
+1. **Authorization Header** (最高优先级): `Authorization: Bearer <token>`
+2. **命名 Header**: `${imaping.token.accessTokenName}: <token>`
+3. **AccessToken Cookie**: `access_token=<token>` (Cookie 名称可配置)
+4. **Request Parameter**: `?access_token=<token>`，默认关闭,需要显式启用
 
 #### 配置 Token 名称
 
@@ -446,129 +447,143 @@ src/main/java/com/example/
 package com.example.controller;
 
 import io.github.imaping.token.api.authentication.Authentication;
-import io.github.imaping.token.api.factory.TokenFactory;
-import io.github.imaping.token.api.model.Token;
+import io.github.imaping.token.api.authentication.principal.Principal;
+import io.github.imaping.token.api.refresh.TokenGrant;
+import io.github.imaping.token.api.refresh.TokenRefreshService;
 import io.github.imaping.token.api.registry.TokenRegistry;
-import jakarta.servlet.http.Cookie;
+import io.github.imaping.token.configuration.IMapingTokenConfigurationProperties;
+import io.github.imaping.token.core.model.BaseUserInfo;
+import io.github.imaping.token.core.util.SecurityContextUtil;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
+import org.springframework.util.StringUtils;
+import org.springframework.web.util.WebUtils;
 import org.springframework.web.bind.annotation.*;
 
-/**
- * 登录控制器
- *
- * <p>提供用户登录和登出功能,创建和删除 Token</p>
- */
 @RestController
-@RequestMapping("/login")
-@RequiredArgsConstructor
 public class LoginController {
 
     private final TokenRegistry tokenRegistry;
+    private final TokenRefreshService tokenRefreshService;
+    private final IMapingTokenConfigurationProperties properties;
 
-    @Qualifier(TokenFactory.BEAN_NAME)
-    private final TokenFactory tokenFactory;
-
-    /**
-     * 用户登录
-     *
-     * @param request 登录请求(用户名、密码)
-     * @param response HTTP 响应,用于设置 Cookie
-     * @return Token 信息
-     */
-    @PostMapping
-    public ResponseEntity<LoginResponse> login(
-            @RequestBody LoginRequest request,
-            HttpServletResponse response) {
-
-        // 1. 验证用户名和密码(这里简化处理,实际应查询数据库)
-        if (!"admin".equals(request.getUsername()) ||
-            !"password".equals(request.getPassword())) {
-            return ResponseEntity.status(401).build();
-        }
-
-        // 2. 创建认证信息
-        Authentication authentication = new Authentication(
-            request.getUsername(),
-            null  // 密码不应存储在 Token 中
-        );
-        authentication.addAttribute("userId", "12345");
-        authentication.addAttribute("role", "ADMIN");
-
-        // 3. 创建 Token
-        Token token = tokenFactory.createToken(authentication);
-
-        // 4. 添加到注册表(如果工厂未自动添加)
-        // tokenRegistry.addToken(token);  // 可选,TokenFactory 通常已添加
-
-        // 5. 设置 Cookie(推荐方式)
-        Cookie cookie = new Cookie("access_token", token.getId());
-        cookie.setHttpOnly(true);     // 防止 XSS
-        cookie.setSecure(true);        // 仅 HTTPS(生产环境)
-        cookie.setPath("/");
-        cookie.setMaxAge(7200);        // 2 小时
-        // cookie.setAttribute("SameSite", "Strict"); // Spring Boot 2.6+ 支持
-        response.addCookie(cookie);
-
-        // 6. 返回 Token 信息
-        return ResponseEntity.ok(new LoginResponse(token.getId(), 7200L));
+    public LoginController(
+            TokenRegistry tokenRegistry,
+            TokenRefreshService tokenRefreshService,
+            IMapingTokenConfigurationProperties properties) {
+        this.tokenRegistry = tokenRegistry;
+        this.tokenRefreshService = tokenRefreshService;
+        this.properties = properties;
     }
 
-    /**
-     * 用户登出
-     *
-     * @param tokenId Token ID(从 Header 或 Cookie 提取)
-     * @param response HTTP 响应,用于清除 Cookie
-     */
+    @PostMapping("/login")
+    public TokenGrant login(String username, String password, HttpServletResponse response) throws Exception {
+        Authentication<String> authentication = new Authentication<>(
+                Principal.<String>builder()
+                        .id(username)
+                        .userInfo(BaseUserInfo.<String>builder()
+                                .id(username)
+                                .loginName(username)
+                                .name("demo-user")
+                                .build())
+                        .build());
+        TokenGrant grant = tokenRefreshService.issue(authentication);
+        writeAccessTokenCookie(response, grant.getAccessToken(), -1);
+        writeRefreshTokenCookie(response, grant.getRefreshToken(), grant.getRefreshTokenExpiresAt());
+        return grant;
+    }
+
+    @PostMapping("/refresh")
+    public TokenGrant refresh(
+            @RequestParam(required = false) String refreshToken,
+            HttpServletRequest request,
+            HttpServletResponse response) throws Exception {
+        TokenGrant grant = tokenRefreshService.refresh(resolveRefreshToken(refreshToken, request));
+        writeAccessTokenCookie(response, grant.getAccessToken(), -1);
+        writeRefreshTokenCookie(response, grant.getRefreshToken(), grant.getRefreshTokenExpiresAt());
+        return grant;
+    }
+
     @PostMapping("/logout")
-    public ResponseEntity<Void> logout(
-            @RequestHeader(value = "Authorization", required = false) String authHeader,
-            @CookieValue(value = "access_token", required = false) String cookieToken,
-            HttpServletResponse response) {
-
-        // 1. 提取 Token ID
-        String tokenId = null;
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            tokenId = authHeader.substring(7);
-        } else if (cookieToken != null) {
-            tokenId = cookieToken;
+    public boolean logout(
+            @RequestParam(required = false) String refreshToken,
+            HttpServletRequest request,
+            HttpServletResponse response) throws Exception {
+        long deleted = 0;
+        String resolvedRefreshToken = resolveRefreshToken(refreshToken, request);
+        if (StringUtils.hasText(resolvedRefreshToken)) {
+            deleted = tokenRefreshService.revokeGrant(resolvedRefreshToken);
+        } else if (StringUtils.hasText(SecurityContextUtil.getCurrentTokenId())) {
+            deleted = tokenRegistry.deleteToken(SecurityContextUtil.getCurrentTokenId());
         }
+        writeAccessTokenCookie(response, "", 0);
+        clearRefreshTokenCookie(response);
+        return deleted > 0;
+    }
 
-        // 2. 删除 Token
-        if (tokenId != null) {
-            tokenRegistry.deleteToken(tokenId);
+    private String resolveRefreshToken(String refreshToken, HttpServletRequest request) {
+        if (StringUtils.hasText(refreshToken)) {
+            return refreshToken;
         }
+        var cookie = WebUtils.getCookie(request, properties.getRefreshToken().getCookieName());
+        return cookie != null ? cookie.getValue() : null;
+    }
 
-        // 3. 清除 Cookie
-        Cookie cookie = new Cookie("access_token", "");
-        cookie.setHttpOnly(true);
-        cookie.setPath("/");
-        cookie.setMaxAge(0);  // 立即过期
-        response.addCookie(cookie);
+    private void writeAccessTokenCookie(HttpServletResponse response, String value, long maxAgeSeconds) {
+        response.addHeader(HttpHeaders.SET_COOKIE, ResponseCookie.from(properties.getAccessTokenName(), value)
+                .httpOnly(true)
+                .path("/")
+                .maxAge(maxAgeSeconds)
+                .build()
+                .toString());
+    }
 
-        return ResponseEntity.ok().build();
+    private void writeRefreshTokenCookie(HttpServletResponse response, String value, java.time.ZonedDateTime expiresAt) {
+        if (!StringUtils.hasText(value)) {
+            clearRefreshTokenCookie(response);
+            return;
+        }
+        long maxAgeSeconds = java.time.Duration.between(java.time.ZonedDateTime.now(expiresAt.getZone()), expiresAt).getSeconds();
+        response.addHeader(HttpHeaders.SET_COOKIE, ResponseCookie.from(properties.getRefreshToken().getCookieName(), value)
+                .httpOnly(true)
+                .path("/")
+                .maxAge(maxAgeSeconds)
+                .build()
+                .toString());
+    }
+
+    private void clearRefreshTokenCookie(HttpServletResponse response) {
+        response.addHeader(HttpHeaders.SET_COOKIE, ResponseCookie.from(properties.getRefreshToken().getCookieName(), "")
+                .httpOnly(true)
+                .path("/")
+                .maxAge(0)
+                .build()
+                .toString());
     }
 }
+```
 
-// DTO 类
-class LoginRequest {
-    private String username;
-    private String password;
-    // getters and setters...
-}
+**当前实现要点:**
 
-class LoginResponse {
-    private String token;
-    private Long expiresIn;
+- 登录默认签发 `AccessToken + RefreshToken`
+- `AccessToken` 可按配置返回普通 tokenId 或 JWT 字符串
+- `RefreshToken` 默认保存在独立 `HttpOnly Cookie`
+- `/refresh` 未显式传 `refreshToken` 时会自动从 Cookie 读取
+- `/logout` 优先撤销整组 grant,否则只删除当前 access token
 
-    public LoginResponse(String token, Long expiresIn) {
-        this.token = token;
-        this.expiresIn = expiresIn;
-    }
-    // getters and setters...
-}
+**JWT 模式示例:**
+
+```yaml
+imaping:
+  token:
+    accessToken:
+      createAsJwt: true
+      jwt:
+        issuer: my-auth-server
+        audience: my-api
+        secret: replace-with-strong-secret
 ```
 
 ---

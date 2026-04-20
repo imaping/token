@@ -42,7 +42,7 @@ public class TestController {
 
     @GetMapping("/sessions")
     public Object sessions() {
-        return tokenSessionService.getSessionsFor(SecurityContextUtil.getUserId(), SecurityContextUtil.getCurrentToken());
+        return tokenSessionService.getSessionsFor(SecurityContextUtil.getUserId(), SecurityContextUtil.getCurrentTokenId());
     }
 
     @DeleteMapping("/sessions/{tokenId}")
@@ -55,7 +55,7 @@ public class TestController {
     @DeleteMapping("/sessions/current/others")
     public Object revokeOtherSessions() throws Exception {
         Map<String, Object> result = new HashMap<>();
-        result.put("deleted", tokenSessionService.revokeOtherSessions(SecurityContextUtil.getUserId(), SecurityContextUtil.getCurrentToken()));
+        result.put("deleted", tokenSessionService.revokeOtherSessions(SecurityContextUtil.getUserId(), SecurityContextUtil.getCurrentTokenId()));
         return result;
     }
 }

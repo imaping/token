@@ -130,7 +130,9 @@ imaping.token.registry.redis.enabled: true
 
 **Redis Key 格式**:
 ```
-imaping.token:{tokenId}:{userId}
+imaping.token:data:{tokenId}
+imaping.token:index:token:{tokenId}
+imaping.token:principal:{principalId}
 ```
 
 #### 1.3.6 imaping-token-resource-client
@@ -169,13 +171,21 @@ Token (接口)
           ├── expired: Boolean
           └── authentication: Authentication
                │
-               ├─── TimeoutAccessToken (接口)
-               │    └── DefaultTimeoutAccessToken
-               │         ├── PREFIX = "AT"
-               │         ├── 过期策略: TimeoutExpirationPolicy
-               │         └── 用途: 自动续期的访问令牌
-               │
-               └─── HardTimeoutToken (接口)
+          ├─── TimeoutAccessToken (接口)
+          │    ├── DefaultTimeoutAccessToken
+          │    └── DefaultJwtAccessToken
+          │         ├── PREFIX = "AT"
+          │         ├── 过期策略: TimeoutExpirationPolicy / HardTimeoutExpirationPolicy(JWT 模式)
+          │         └── 用途: 访问令牌
+          │
+          ├─── RefreshToken (接口)
+          │    └── DefaultRefreshToken
+          │         ├── PREFIX = "RT"
+          │         ├── accessTokenId: String
+          │         ├── 过期策略: HardTimeoutExpirationPolicy
+          │         └── 用途: AccessToken 续签与轮换
+          │
+          └─── HardTimeoutToken (接口)
                     └── DefaultHardTimeoutToken
                          ├── PREFIX = "ATT"
                          ├── code: String (业务编码)
@@ -188,6 +198,8 @@ Token (接口)
 - [`Token`](imaping-token-api/src/main/java/com/imaping/token/api/model/Token.java:1)
 - [`AbstractToken`](imaping-token-api/src/main/java/com/imaping/token/api/model/AbstractToken.java:1)
 - [`DefaultTimeoutAccessToken`](imaping-token-api/src/main/java/com/imaping/token/api/model/DefaultTimeoutAccessToken.java:1)
+- [`DefaultJwtAccessToken`](imaping-token-api/src/main/java/com/imaping/token/api/model/DefaultJwtAccessToken.java:1)
+- [`DefaultRefreshToken`](imaping-token-api/src/main/java/com/imaping/token/api/model/DefaultRefreshToken.java:1)
 - [`DefaultHardTimeoutToken`](imaping-token-api/src/main/java/com/imaping/token/api/model/DefaultHardTimeoutToken.java:1)
 
 ### 2.2 ExpirationPolicy 过期策略
@@ -269,22 +281,31 @@ TokenRegistry (接口)
 
 ```
 TokenFactory (接口)
-├── getTokenType(): Class<? extends Token>           # 获取 Token 类型
-├── createToken(Authentication): Token               # 创建 Token
-└── createToken(String, Authentication): Token       # 创建指定 ID 的 Token
+├── getTokenType(): Class<? extends Token>    # 获取 Token 类型
+└── get(Class<? extends Token>): TokenFactory  # 组合工厂按类型委派
      │
      ├─── DefaultTokenFactory
      │    ├── 组合工厂
-     │    ├── 支持多种 Token 类型
-     │    └── 根据类型委托给具体工厂
+     │    ├── 支持 Timeout / Refresh / HardTimeout
+     │    └── 根据 Token 类型委托给具体工厂
      │
      ├─── TimeoutTokenFactory (接口)
      │    └── TimeoutTokenDefaultFactory
-     │         └── 创建 DefaultTimeoutAccessToken
+     │         ├── createAsJwt=false → 创建 DefaultTimeoutAccessToken
+     │         └── createAsJwt=true  → 创建 DefaultJwtAccessToken
+     │
+     ├─── RefreshTokenFactory (接口)
+     │    └── RefreshTokenDefaultFactory
+     │         └── 创建 DefaultRefreshToken
      │
      └─── HardTimeoutTokenFactory (接口)
           └── HardTimeoutTokenDefaultFactory
                └── 创建 DefaultHardTimeoutToken
+
+AccessTokenCodec
+└── DefaultAccessTokenCodec
+     ├── 普通模式: 直接返回 tokenId
+     └── JWT 模式: 编码/解码 AccessToken JWT
 ```
 
 **关键源文件**:
@@ -379,8 +400,8 @@ Authentication (类)
 
 ```
 ┌─────────────────────┐
-│   HTTP 请求          │
-│ (包含 Token)         │
+│   HTTP 请求           │
+│ (包含 AccessToken)    │
 └──────┬──────────────┘
        │
        ▼
@@ -388,13 +409,14 @@ Authentication (类)
 │  TokenAuthenticationFilter          │ ← 过滤器链
 │  extends OncePerRequestFilter       │
 └──────┬──────────────────────────────┘
-       │ 1. 提取 Token
-       │    - 从 Header (Authorization: Bearer <token>)
-       │    - 从 Cookie (access_token)
-       │    - 从 RequestParameter (?access_token=xxx)
+       │ 1. 提取原始 AccessToken
+       │    - Authorization: Bearer <token>
+       │    - 命名 Header
+       │    - Cookie (access_token)
+       │    - RequestParameter(默认关闭)
        ▼
 ┌─────────────────────┐
-│ 提取到 Token ID      │
+│ 提取到原始 token 值   │
 └──────┬──────────────┘
        │ 2. 构造认证请求
        ▼
@@ -406,18 +428,20 @@ Authentication (类)
 ┌─────────────────────────────────────┐
 │  TokenAuthenticationProvider        │
 └──────┬──────────────────────────────┘
-       │ 4. 从注册表获取 Token
+       │ 4. AccessTokenCodec.decode()
+       │    - 普通模式: tokenId = 原始值
+       │    - JWT 模式: 验签并从 jti 提取 tokenId
        ▼
 ┌─────────────────────┐
-│   TokenRegistry     │
-│ .getToken(tokenId)  │
+│ 提取到注册表 tokenId  │
 └──────┬──────────────┘
-       │ 5. 获取 Token
+       │ 5. TokenRegistry.getToken(tokenId)
        ▼
 ┌─────────────────────┐
 │      Token          │
 └──────┬──────────────┘
-       │ 6. 验证过期状态
+       │ 6. 验证类型与过期状态
+       │    - RefreshToken 禁止访问业务资源
        ▼
 ┌─────────────────────┐
 │ ExpirationPolicy    │
@@ -440,8 +464,8 @@ Authentication (类)
        ▼
 ┌─────────────────────────────────────┐
 │  DefaultTokenAuthentication         │
-│  - principal: Principal             │
-│  - token: Token                     │
+│  - token: 原始 access token 值       │
+│  - tokenId: 注册表 tokenId          │
 └──────┬──────────────────────────────┘
        │ 9. 设置到 SecurityContext
        ▼
@@ -460,9 +484,10 @@ Authentication (类)
 **关键代码路径**:
 1. 过滤器: [`TokenAuthenticationFilter.doFilterInternal()`](imaping-token-resource-client/src/main/java/com/imaping/token/resource/client/filter/TokenAuthenticationFilter.java:1)
 2. 认证提供者: [`TokenAuthenticationProvider.authenticate()`](imaping-token-resource-client/src/main/java/com/imaping/token/resource/client/authentication/TokenAuthenticationProvider.java:1)
-3. 注册表查询: `tokenRegistry.getToken(tokenId)`
-4. 过期验证: `token.isExpired()`
-5. 更新使用状态: `token.update()` → 更新 `lastTimeUsed`, `countOfUses`
+3. AccessToken 解码: `accessTokenCodec.decode(tokenValue)`
+4. 注册表查询: `tokenRegistry.getToken(tokenId)`
+5. 过期验证: `token.isExpired()`
+6. 更新使用状态: `token.update()` → 更新 `lastTimeUsed`, `countOfUses`
 
 ### 3.3 Token 清理流程
 

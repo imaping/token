@@ -30,16 +30,22 @@ public class DefaultTokenAuthentication extends AbstractAuthenticationToken {
     private final Authentication<?> authentication;
 
     private final String token;
+    private final String tokenId;
 
-    public DefaultTokenAuthentication(Authentication<?> authentication, String token, Collection<? extends GrantedAuthority> authorities) {
+    public DefaultTokenAuthentication(Authentication<?> authentication, String token, String tokenId, Collection<? extends GrantedAuthority> authorities) {
         super(authorities);
         this.authentication = authentication;
         this.token = token;
+        this.tokenId = tokenId;
         setAuthenticated(true);
     }
 
+    public DefaultTokenAuthentication(Authentication<?> authentication, String token, Collection<? extends GrantedAuthority> authorities) {
+        this(authentication, token, token, authorities);
+    }
+
     public DefaultTokenAuthentication(Authentication<?> authentication, String token) {
-        this(authentication, token, null);
+        this(authentication, token, token, null);
     }
 
     @Override

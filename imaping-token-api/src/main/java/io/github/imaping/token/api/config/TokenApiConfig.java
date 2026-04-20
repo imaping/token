@@ -11,26 +11,35 @@ import io.github.imaping.token.api.expiration.builder.HardTimeoutExpirationPolic
 import io.github.imaping.token.api.expiration.builder.TimeoutExpirationPolicyBuilder;
 import io.github.imaping.token.api.generator.DefaultUniqueTokenIdGenerator;
 import io.github.imaping.token.api.generator.UniqueTokenIdGenerator;
+import io.github.imaping.token.api.jwt.AccessTokenCodec;
+import io.github.imaping.token.api.jwt.DefaultAccessTokenCodec;
 import io.github.imaping.token.api.lock.LockRepository;
 import io.github.imaping.token.api.model.HardTimeoutToken;
+import io.github.imaping.token.api.model.RefreshToken;
 import io.github.imaping.token.api.model.TimeoutAccessToken;
 import io.github.imaping.token.api.registry.CachingTokenRegistry;
 import io.github.imaping.token.api.registry.ConcurrentSessionControlTokenRegistry;
 import io.github.imaping.token.api.registry.DefaultTokenRegistry;
 import io.github.imaping.token.api.registry.TokenRegistry;
+import io.github.imaping.token.api.refresh.DefaultTokenRefreshService;
+import io.github.imaping.token.api.refresh.TokenRefreshService;
 import io.github.imaping.token.api.session.DefaultTokenSessionService;
 import io.github.imaping.token.api.session.TokenSessionService;
 import io.github.imaping.token.core.TokenCoreAutoConfig;
 import io.github.imaping.token.core.model.UserInfoContext;
+import io.github.imaping.token.configuration.model.token.TokenJwtProperties;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.context.SmartLifecycle;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.util.StringUtils;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -71,8 +80,9 @@ public class TokenApiConfig {
     @ConditionalOnMissingBean(name = "timeoutTokenFactory")
     public TimeoutTokenFactory timeoutTokenFactory(
             @Qualifier("tokenIdGenerator") final UniqueTokenIdGenerator idGenerator,
-            @Qualifier("accessTokenExpirationPolicy") final ExpirationPolicyBuilder<TimeoutAccessToken> accessTokenExpirationPolicy) {
-        return new TimeoutTokenDefaultFactory(idGenerator, accessTokenExpirationPolicy);
+            @Qualifier("accessTokenExpirationPolicy") final ExpirationPolicyBuilder<TimeoutAccessToken> accessTokenExpirationPolicy,
+            final IMapingTokenConfigurationProperties properties) {
+        return new TimeoutTokenDefaultFactory(idGenerator, accessTokenExpirationPolicy, properties);
     }
 
     @Bean
@@ -81,6 +91,14 @@ public class TokenApiConfig {
             @Qualifier("tokenIdGenerator") final UniqueTokenIdGenerator idGenerator,
             @Qualifier("hardTimeoutExpirationPolicy") final HardTimeoutExpirationPolicyBuilder<HardTimeoutToken> hardTimeoutExpirationPolicy) {
         return new HardTimeoutTokenDefaultFactory(idGenerator, hardTimeoutExpirationPolicy);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(name = "refreshTokenFactory")
+    public RefreshTokenFactory refreshTokenFactory(
+            @Qualifier("tokenIdGenerator") final UniqueTokenIdGenerator idGenerator,
+            final IMapingTokenConfigurationProperties properties) {
+        return new RefreshTokenDefaultFactory(idGenerator, properties);
     }
 
 
@@ -118,6 +136,51 @@ public class TokenApiConfig {
     @ConditionalOnMissingBean(name = TokenSessionService.BEAN_NAME)
     public TokenSessionService tokenSessionService(@Qualifier(TokenRegistry.BEAN_NAME) final TokenRegistry tokenRegistry) {
         return new DefaultTokenSessionService(tokenRegistry);
+    }
+
+    @Bean(name = AccessTokenCodec.BEAN_NAME)
+    @ConditionalOnMissingBean(name = AccessTokenCodec.BEAN_NAME)
+    public AccessTokenCodec accessTokenCodec(final IMapingTokenConfigurationProperties properties) {
+        return new DefaultAccessTokenCodec(properties);
+    }
+
+    @Bean
+    public Runnable jwtConfigurationValidator(final IMapingTokenConfigurationProperties properties) {
+        validateJwtConfiguration(properties);
+        return () -> {
+        };
+    }
+
+    @Bean(name = TokenRefreshService.BEAN_NAME)
+    @ConditionalOnMissingBean(name = TokenRefreshService.BEAN_NAME)
+    public TokenRefreshService tokenRefreshService(@Qualifier(TokenRegistry.BEAN_NAME) final TokenRegistry tokenRegistry,
+                                                   final TimeoutTokenFactory timeoutTokenFactory,
+                                                   final RefreshTokenFactory refreshTokenFactory,
+                                                   final IMapingTokenConfigurationProperties properties,
+                                                   @Qualifier(AccessTokenCodec.BEAN_NAME) final AccessTokenCodec accessTokenCodec) {
+        return new DefaultTokenRefreshService(tokenRegistry, timeoutTokenFactory, refreshTokenFactory, properties, accessTokenCodec);
+    }
+
+    private void validateJwtConfiguration(final IMapingTokenConfigurationProperties properties) {
+        if (!properties.getAccessToken().isCreateAsJwt()) {
+            return;
+        }
+        final TokenJwtProperties jwtProperties = properties.getAccessToken().getJwt();
+        if (!StringUtils.hasText(jwtProperties.getIssuer())) {
+            throw new IllegalStateException("启用 JWT AccessToken 时必须配置非空的 imaping.token.accessToken.jwt.issuer");
+        }
+        if (!StringUtils.hasText(jwtProperties.getAudience())) {
+            throw new IllegalStateException("启用 JWT AccessToken 时必须配置非空的 imaping.token.accessToken.jwt.audience");
+        }
+        if (!StringUtils.hasText(jwtProperties.getSecret())) {
+            throw new IllegalStateException("启用 JWT AccessToken 时必须配置非空的 imaping.token.accessToken.jwt.secret");
+        }
+        if (jwtProperties.usesDefaultSecret()) {
+            throw new IllegalStateException("启用 JWT AccessToken 时禁止使用默认开发密钥,请显式配置 imaping.token.accessToken.jwt.secret");
+        }
+        if (jwtProperties.getSecret().getBytes(StandardCharsets.UTF_8).length < 32) {
+            throw new IllegalStateException("JWT HS256 签名密钥长度至少需要 32 字节");
+        }
     }
 }
 

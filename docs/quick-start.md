@@ -23,11 +23,12 @@
 
 ### 2.1 Token (令牌)
 
-Token 是系统的核心实体,代表用户的认证凭证。系统提供两种 Token 类型:
+Token 是系统的核心实体,代表用户的认证凭证。系统当前提供三种 Token 类型:
 
 | Token 类型 | 说明 | 过期策略 | 适用场景 |
 |-----------|------|---------|---------|
 | **TimeoutAccessToken** | 自动续期访问令牌 | 每次使用自动续期 | 用户会话管理 |
+| **RefreshToken** | 续签令牌 | 固定时间后失效,刷新时轮换 | AccessToken 续签 |
 | **HardTimeoutToken** | 固定时间令牌 | 固定时间后失效 | 验证码、临时授权链接 |
 
 **Token 核心属性:**
@@ -37,6 +38,8 @@ Token 是系统的核心实体,代表用户的认证凭证。系统提供两种 
 - `creationTime` - 创建时间
 - `lastTimeUsed` - 最后使用时间
 - `countOfUses` - 使用次数
+
+当 `imaping.token.accessToken.createAsJwt=true` 时,客户端拿到的 AccessToken 会是签名后的 JWT 字符串；服务端仍保留注册表记录,以支持注销、会话管理和 refresh token 续签。
 
 ### 2.2 TokenRegistry (Token 注册表)
 
@@ -491,11 +494,13 @@ curl -X POST -H "access_token: AT-1-abcd1234efgh5678ijkl9012mnop3456" \
 
 **Token 传递方式:**
 
-imaping-token 支持三种 Token 传递方式,按优先级排序:
+当前默认推荐的传递方式如下:
 
-1. **HTTP Header** (推荐): `access_token: <token>`
-2. **Cookie**: `access_token=<token>`
-3. **URL 参数**: `?access_token=<token>`
+1. **AccessToken**: `Authorization: Bearer <token>` 或 `access_token: <token>`
+2. **AccessToken Cookie**: `access_token=<token>`
+3. **RefreshToken Cookie**: `refresh_token=<token>`，默认用于 `/refresh` 自动续签
+
+默认情况下,AccessToken 的 URL 参数传递是关闭的,需要显式配置后才可使用。
 
 ---
 
@@ -579,7 +584,15 @@ imaping:
 
 多实例部署时必须让所有实例共享同一个 Redis,并保持 `enableLocking=true`,这样单账号单登才能在全局生效。
 
-### Q5: Token 过期后会自动删除吗?
+### Q5: RefreshToken 如何使用?
+
+**A**: 默认登录成功后会同时签发 AccessToken 和 RefreshToken:
+
+- AccessToken 用于访问业务接口
+- RefreshToken 默认写入 `HttpOnly` Cookie: `refresh_token`
+- 调用 `/refresh` 时,如果请求参数未显式提供 `refreshToken`,框架会自动从 Cookie 读取并轮换签发新的一对 Token
+
+### Q6: Token 过期后会自动删除吗?
 
 **A**: 取决于存储后端:
 

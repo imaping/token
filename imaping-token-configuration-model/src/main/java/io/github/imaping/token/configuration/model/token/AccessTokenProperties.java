@@ -39,5 +39,11 @@ public class AccessTokenProperties {
      */
     @NestedConfigurationProperty
     private TokenFailureRedirectProperties failureRedirect = new TokenFailureRedirectProperties();
+
+    /**
+     * JWT 配置。
+     */
+    @NestedConfigurationProperty
+    private TokenJwtProperties jwt = new TokenJwtProperties();
 }
 

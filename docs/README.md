@@ -43,12 +43,15 @@
   - 配置项分类和说明
   - 常见配置场景示例
   - 开发/生产环境配置
+  - Refresh Token 与 JWT 配置
 
 - **[API 使用指南](api-guide.md)** 💻 ⭐ 新增
   - TokenRegistry API
   - TokenFactory 使用
   - 自定义 Token 类型
   - 自定义过期策略
+  - Refresh Token 续签
+  - JWT AccessToken
 
 ### 🔌 集成和部署
 

@@ -1,7 +1,7 @@
 package io.github.imaping.token.api.registry;
 
 import io.github.imaping.token.api.authentication.AuthenticationAwareToken;
-import io.github.imaping.token.api.model.DefaultTimeoutAccessToken;
+import io.github.imaping.token.api.model.TimeoutAccessToken;
 import io.github.imaping.token.api.model.Token;
 import org.jooq.lambda.Unchecked;
 
@@ -154,7 +154,7 @@ public interface TokenRegistry {
      * @return the sessions for
      */
     default Stream<? extends Token> getSessionsFor(final String principalId) {
-        return getTokens(token -> token instanceof DefaultTimeoutAccessToken
+        return getTokens(token -> token instanceof TimeoutAccessToken
                 && !token.isExpired()
                 && ((AuthenticationAwareToken) token).getAuthentication().getPrincipal().getId().equals(principalId));
     }

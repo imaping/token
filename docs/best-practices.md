@@ -525,24 +525,39 @@ server {
 
 ```java
 @PostMapping("/login")
-public ResponseEntity<Void> login(HttpServletResponse response, @RequestBody LoginRequest request) {
-    // ... 验证用户名密码,创建 Token ...
+public TokenGrant login(HttpServletResponse response) throws Exception {
+    TokenGrant grant = tokenRefreshService.issue(authentication);
 
-    Cookie cookie = new Cookie("access_token", token.getId());
+    ResponseCookie accessCookie = ResponseCookie.from("access_token", grant.getAccessToken())
+            .httpOnly(true)
+            .secure(true)
+            .sameSite("Lax")
+            .path("/")
+            .maxAge(Duration.ofHours(2))
+            .build();
 
-    // ✅ 必须配置的安全属性
-    cookie.setHttpOnly(true);    // 防止 XSS 攻击(JavaScript 无法访问)
-    cookie.setSecure(true);       // 仅 HTTPS 传输(生产环境必须)
-    cookie.setPath("/");          // Cookie 作用范围
+    ResponseCookie refreshCookie = ResponseCookie.from("refresh_token", grant.getRefreshToken())
+            .httpOnly(true)
+            .secure(true)
+            .sameSite("Strict")
+            .path("/")
+            .maxAge(Duration.ofDays(30))
+            .build();
 
-    // ✅ 推荐配置的安全属性
-    cookie.setMaxAge(7200);       // 过期时间(2 小时)
-    // cookie.setAttribute("SameSite", "Strict"); // 防止 CSRF 攻击(Spring Boot 2.6+)
-
-    response.addCookie(cookie);
-    return ResponseEntity.ok().build();
+    response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
+    response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
+    return grant;
 }
 ```
+
+**当前实现建议**:
+
+- `access_token`:
+  - API 场景优先使用 `Authorization: Bearer`
+  - 如需 Cookie,建议 `SameSite=Lax`
+- `refresh_token`:
+  - 默认独立 `HttpOnly Cookie`
+  - 推荐 `SameSite=Strict`,尽量只用于 `/refresh` / `/logout`
 
 #### Cookie 属性说明
 
@@ -584,7 +599,7 @@ public class SecurityConfig extends TokenSecurityConfig {
 
 #### 场景二: 传统 Web 应用(使用 Cookie 认证)
 
-使用 Cookie 存储 Token 时,**必须启用 CSRF 保护**:
+如果业务依赖浏览器自动发送 Cookie,尤其是 `refresh_token` 用于 `/refresh` 或 `/logout`,**必须启用 CSRF 保护或至少增加 Origin/Referer 校验**:
 
 ```java
 @Configuration
@@ -597,6 +612,14 @@ public class SecurityConfig extends TokenSecurityConfig {
     }
 }
 ```
+
+**适用判断**:
+
+- `Authorization` Header 持有 AccessToken,不依赖 Cookie 自动发送:
+  - 可以禁用 CSRF
+- AccessToken / RefreshToken 走 HttpOnly Cookie:
+  - 建议开启 CSRF
+  - 至少保证 `SameSite`、`Origin/Referer` 校验和敏感接口白名单策略
 
 **前端集成**:
 

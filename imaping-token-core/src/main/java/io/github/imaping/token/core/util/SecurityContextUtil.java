@@ -2,6 +2,8 @@ package io.github.imaping.token.core.util;
 
 import io.github.imaping.token.core.model.UserInfo;
 import io.github.imaping.token.core.model.UserInfoContext;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.io.Serializable;
 
@@ -36,6 +38,26 @@ public class SecurityContextUtil {
      */
     public static String getCurrentToken() {
         return userInfoContext.getCurrentUserInfo().getAccessToken();
+    }
+
+    /**
+     * 获取当前访问令牌在注册表中的标识。
+     *
+     * <p>在 JWT 模式下,该值与客户端看到的 JWT 字符串不同。</p>
+     */
+    public static String getCurrentTokenId() {
+        final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null) {
+            try {
+                final Object tokenId = authentication.getClass().getMethod("getTokenId").invoke(authentication);
+                if (tokenId != null) {
+                    return String.valueOf(tokenId);
+                }
+            } catch (ReflectiveOperationException ignored) {
+                // 兼容非 token 认证场景,回退到原始 token 值
+            }
+        }
+        return getCurrentToken();
     }
 
     /**
