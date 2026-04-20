@@ -96,14 +96,14 @@ Collection<Token> tokens = tokenRegistry.getSessionsFor(userId);
     <dependency>
         <groupId>io.github.imaping</groupId>
         <artifactId>imaping-token-api</artifactId>
-        <version>1.3.2</version>
+        <version>1.5.0</version>
     </dependency>
 
     <!-- Spring Security 集成 -->
     <dependency>
         <groupId>io.github.imaping</groupId>
         <artifactId>imaping-token-resource-client</artifactId>
-        <version>1.3.2</version>
+        <version>1.5.0</version>
     </dependency>
 </dependencies>
 ```
@@ -124,21 +124,21 @@ Collection<Token> tokens = tokenRegistry.getSessionsFor(userId);
     <dependency>
         <groupId>io.github.imaping</groupId>
         <artifactId>imaping-token-api</artifactId>
-        <version>1.3.2</version>
+        <version>1.5.0</version>
     </dependency>
 
     <!-- Redis 存储实现 -->
     <dependency>
         <groupId>io.github.imaping</groupId>
         <artifactId>imaping-token-redis-registry</artifactId>
-        <version>1.3.2</version>
+        <version>1.5.0</version>
     </dependency>
 
     <!-- Spring Security 集成 -->
     <dependency>
         <groupId>io.github.imaping</groupId>
         <artifactId>imaping-token-resource-client</artifactId>
-        <version>1.3.2</version>
+        <version>1.5.0</version>
     </dependency>
 </dependencies>
 ```
@@ -510,7 +510,7 @@ imaping-token 支持三种 Token 传递方式,按优先级排序:
 <dependency>
     <groupId>io.github.imaping</groupId>
     <artifactId>imaping-token-redis-registry</artifactId>
-    <version>1.3.2</version>
+    <version>1.5.0</version>
 </dependency>
 ```
 

@@ -78,7 +78,7 @@ imaping-token-parent
 - 定义所有子模块版本 (通过 `${revision}` 变量)
 - 统一管理第三方库版本 (Caffeine, Commons-Lang3 等)
 
-#### 1.3.2 imaping-configuration-model
+#### 1.5.0 imaping-configuration-model
 
 **职责**: 配置属性模型定义
 
