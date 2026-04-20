@@ -18,6 +18,8 @@ import io.github.imaping.token.api.registry.CachingTokenRegistry;
 import io.github.imaping.token.api.registry.ConcurrentSessionControlTokenRegistry;
 import io.github.imaping.token.api.registry.DefaultTokenRegistry;
 import io.github.imaping.token.api.registry.TokenRegistry;
+import io.github.imaping.token.api.session.DefaultTokenSessionService;
+import io.github.imaping.token.api.session.TokenSessionService;
 import io.github.imaping.token.core.TokenCoreAutoConfig;
 import io.github.imaping.token.core.model.UserInfoContext;
 import lombok.extern.slf4j.Slf4j;
@@ -110,6 +112,12 @@ public class TokenApiConfig {
     @ConditionalOnMissingBean(name = UserInfoContext.BEAN_NAME)
     public UserInfoContext<String> tokenUserInfoContext() {
         return new TokenUserInfoContext();
+    }
+
+    @Bean(name = TokenSessionService.BEAN_NAME)
+    @ConditionalOnMissingBean(name = TokenSessionService.BEAN_NAME)
+    public TokenSessionService tokenSessionService(@Qualifier(TokenRegistry.BEAN_NAME) final TokenRegistry tokenRegistry) {
+        return new DefaultTokenSessionService(tokenRegistry);
     }
 }
 

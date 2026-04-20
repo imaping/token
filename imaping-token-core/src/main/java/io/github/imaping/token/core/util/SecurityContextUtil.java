@@ -37,5 +37,17 @@ public class SecurityContextUtil {
     public static String getCurrentToken() {
         return userInfoContext.getCurrentUserInfo().getAccessToken();
     }
+
+    /**
+     * 获取当前用户 ID。
+     *
+     * @return 当前用户 ID
+     */
+    public static String getUserId() {
+        final UserInfo<?> currentUserInfo = userInfoContext.getCurrentUserInfo();
+        return currentUserInfo != null && currentUserInfo.getId() != null
+                ? String.valueOf(currentUserInfo.getId())
+                : null;
+    }
 }
 
