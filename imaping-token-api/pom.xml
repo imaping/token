@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>com.imaping</groupId>
+        <groupId>io.github.imaping</groupId>
         <artifactId>imaping-token-parent</artifactId>
         <version>${revision}</version>
         <relativePath>../pom.xml</relativePath>
@@ -12,6 +12,7 @@
 
     <artifactId>imaping-token-api</artifactId>
     <name>imaping-token-api</name>
+    <description>imaping-token 核心 API、Token 模型与注册表能力。</description>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
@@ -63,7 +64,7 @@
             <artifactId>commons-codec</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.imaping</groupId>
+            <groupId>io.github.imaping</groupId>
             <artifactId>imaping-token-core</artifactId>
         </dependency>
         <dependency>
@@ -89,7 +90,7 @@
             <optional>true</optional>
         </dependency>
         <dependency>
-            <groupId>com.imaping</groupId>
+            <groupId>io.github.imaping</groupId>
             <artifactId>imaping-token-configuration-model</artifactId>
         </dependency>
     </dependencies>

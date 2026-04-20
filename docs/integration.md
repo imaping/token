@@ -2,7 +2,7 @@
 
 > **快速参考**: imaping-token 系统集成步骤和部署配置
 > **最后更新**: 2026-03-19
-> **适用版本**: 0.0.6-SNAPSHOT
+> **适用版本**: 1.3.2
 
 ---
 
@@ -29,16 +29,16 @@
 <dependencies>
     <!-- imaping-token 核心依赖 -->
     <dependency>
-        <groupId>com.imaping</groupId>
+        <groupId>io.github.imaping</groupId>
         <artifactId>imaping-token-resource-client</artifactId>
-        <version>0.0.6-SNAPSHOT</version>
+        <version>1.3.2</version>
     </dependency>
 
     <!-- imaping-token Redis 存储(可选,分布式场景需要) -->
     <dependency>
-        <groupId>com.imaping</groupId>
+        <groupId>io.github.imaping</groupId>
         <artifactId>imaping-token-redis-registry</artifactId>
-        <version>0.0.6-SNAPSHOT</version>
+        <version>1.3.2</version>
     </dependency>
 </dependencies>
 ```
@@ -52,10 +52,10 @@
 ```groovy
 dependencies {
     // imaping-token 核心依赖
-    implementation 'com.imaping:imaping-token-resource-client:0.0.6-SNAPSHOT'
+    implementation 'io.github.imaping:imaping-token-resource-client:1.3.2'
 
     // imaping-token Redis 存储(可选)
-    implementation 'com.imaping:imaping-token-redis-registry:0.0.6-SNAPSHOT'
+    implementation 'io.github.imaping:imaping-token-redis-registry:1.3.2'
 }
 ```
 
@@ -973,9 +973,9 @@ spring:
 
 ```xml
 <dependency>
-    <groupId>com.imaping</groupId>
+    <groupId>io.github.imaping</groupId>
     <artifactId>imaping-token-redis-registry</artifactId>
-    <version>0.0.6-SNAPSHOT</version>
+    <version>1.3.2</version>
 </dependency>
 ```
 
@@ -1775,3 +1775,4 @@ public class HybridSecurityConfig {
 **最后更新**: 2025-10-12
 **文档版本**: v1.0
 **反馈渠道**: docs@example.com
+

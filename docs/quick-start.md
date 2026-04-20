@@ -94,16 +94,16 @@ Collection<Token> tokens = tokenRegistry.getSessionsFor(userId);
 
     <!-- imaping-token 核心 API -->
     <dependency>
-        <groupId>com.imaping</groupId>
+        <groupId>io.github.imaping</groupId>
         <artifactId>imaping-token-api</artifactId>
-        <version>0.0.6-SNAPSHOT</version>
+        <version>1.3.2</version>
     </dependency>
 
     <!-- Spring Security 集成 -->
     <dependency>
-        <groupId>com.imaping</groupId>
+        <groupId>io.github.imaping</groupId>
         <artifactId>imaping-token-resource-client</artifactId>
-        <version>0.0.6-SNAPSHOT</version>
+        <version>1.3.2</version>
     </dependency>
 </dependencies>
 ```
@@ -122,23 +122,23 @@ Collection<Token> tokens = tokenRegistry.getSessionsFor(userId);
 
     <!-- imaping-token 核心 API -->
     <dependency>
-        <groupId>com.imaping</groupId>
+        <groupId>io.github.imaping</groupId>
         <artifactId>imaping-token-api</artifactId>
-        <version>0.0.6-SNAPSHOT</version>
+        <version>1.3.2</version>
     </dependency>
 
     <!-- Redis 存储实现 -->
     <dependency>
-        <groupId>com.imaping</groupId>
+        <groupId>io.github.imaping</groupId>
         <artifactId>imaping-token-redis-registry</artifactId>
-        <version>0.0.6-SNAPSHOT</version>
+        <version>1.3.2</version>
     </dependency>
 
     <!-- Spring Security 集成 -->
     <dependency>
-        <groupId>com.imaping</groupId>
+        <groupId>io.github.imaping</groupId>
         <artifactId>imaping-token-resource-client</artifactId>
-        <version>0.0.6-SNAPSHOT</version>
+        <version>1.3.2</version>
     </dependency>
 </dependencies>
 ```
@@ -508,9 +508,9 @@ imaping-token 支持三种 Token 传递方式,按优先级排序:
 1. 添加 Maven 依赖:
 ```xml
 <dependency>
-    <groupId>com.imaping</groupId>
+    <groupId>io.github.imaping</groupId>
     <artifactId>imaping-token-redis-registry</artifactId>
-    <version>0.0.6-SNAPSHOT</version>
+    <version>1.3.2</version>
 </dependency>
 ```
 
@@ -603,3 +603,4 @@ imaping:
 **文档维护**: imaping-token 团队
 **问题反馈**: 请通过项目 Issue 提交
 **最后更新**: 2025-10-12
+
