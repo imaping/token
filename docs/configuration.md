@@ -86,7 +86,7 @@ export IMAPING_TOKEN_ACCESSTOKEN_TIMETOKILLINSECONDS=PT2H
 ```yaml
 imaping:
   token:
-    accessTokenName: admin_token  # 管理后台使用 "admin_token"
+        accessTokenName: admin_token  # 管理后台使用 "admin_token"
 ```
 
 ---
@@ -120,9 +120,9 @@ Token 注册表 (TokenRegistry) 负责存储和管理 Token,支持内存和 Redi
 ```yaml
 imaping:
   token:
-    registry:
-      core:
-        enableLocking: true  # 生产环境启用分布式锁
+        registry:
+          core:
+            enableLocking: true  # 生产环境启用分布式锁
 ```
 
 ### 3.2 内存注册表配置
@@ -166,14 +166,14 @@ imaping:
 ```yaml
 imaping:
   token:
-    registry:
-      redis:
-        enabled: false  # 禁用 Redis,使用内存存储
-      inMemory:
-        cache: true
-        initialCapacity: 5000     # 预估 5000 个 Token
-        loadFactor: 1
-        concurrency: 50           # 50 个并发线程
+        registry:
+          redis:
+            enabled: false  # 禁用 Redis,使用内存存储
+          inMemory:
+            cache: true
+            initialCapacity: 5000     # 预估 5000 个 Token
+            loadFactor: 1
+            concurrency: 50           # 50 个并发线程
 ```
 
 ### 3.3 Redis 注册表配置
@@ -232,9 +232,9 @@ Redis 注册表会根据 Token 的过期策略自动设置 TTL,Token 过期后 R
 ```yaml
 imaping:
   token:
-    registry:
-      redis:
-        enabled: true  # 启用 Redis 注册表
+        registry:
+          redis:
+            enabled: true  # 启用 Redis 注册表
 
 spring:
   data:
@@ -284,17 +284,17 @@ spring:
 ```yaml
 imaping:
   token:
-    registry:
-      redis:
-        enabled: true
-      core:
-        enableLocking: true
-      concurrentSessions:
-        enabled: true
-        maxSessions: 1
-        overflowStrategy: INVALIDATE_OLDEST
-        enabledTokenTypes:
-          - TimeoutAccessToken
+        registry:
+          redis:
+            enabled: true
+          core:
+            enableLocking: true
+          concurrentSessions:
+            enabled: true
+            maxSessions: 1
+            overflowStrategy: INVALIDATE_OLDEST
+            enabledTokenTypes:
+              - TimeoutAccessToken
 ```
 
 ### 3.5 注册表清理器配置
@@ -355,51 +355,51 @@ imaping:
 # 场景 1: 内存注册表 + 定时清理
 imaping:
   token:
-    registry:
-      redis:
-        enabled: false
-      inMemory:
-        cache: false  # 禁用 Caffeine 缓存
-      cleaner:
-        schedule:
-          enabled: true
-          startDelay: PT30S
-          repeatInterval: PT5M
+        registry:
+          redis:
+            enabled: false
+          inMemory:
+            cache: false  # 禁用 Caffeine 缓存
+          cleaner:
+            schedule:
+              enabled: true
+              startDelay: PT30S
+              repeatInterval: PT5M
 
 # 场景 2: Redis 注册表 (无需清理器)
 imaping:
   token:
-    registry:
-      redis:
-        enabled: true
-      cleaner:
-        schedule:
-          enabled: false  # 禁用清理器
+        registry:
+          redis:
+            enabled: true
+          cleaner:
+            schedule:
+              enabled: false  # 禁用清理器
 
 # 场景 3: Caffeine 缓存 (无需清理器)
 imaping:
   token:
-    registry:
-      redis:
-        enabled: false
-      inMemory:
-        cache: true  # 启用 Caffeine 缓存
-      cleaner:
-        schedule:
-          enabled: false  # 禁用清理器
+        registry:
+          redis:
+            enabled: false
+          inMemory:
+            cache: true  # 启用 Caffeine 缓存
+          cleaner:
+            schedule:
+              enabled: false  # 禁用清理器
 
 # 场景 4: 集群环境指定清理节点
 imaping:
   token:
-    registry:
-      redis:
-        enabled: false
-      inMemory:
-        cache: false
-      cleaner:
-        schedule:
-          enabled: true
-          enabledOnHost: "app-node-1"  # 只有 app-node-1 执行清理
+        registry:
+          redis:
+            enabled: false
+          inMemory:
+            cache: false
+          cleaner:
+            schedule:
+              enabled: true
+              enabledOnHost: "app-node-1"  # 只有 app-node-1 执行清理
 ```
 
 ---
@@ -437,20 +437,20 @@ imaping:
 # 场景 1: Web 应用 (2 小时)
 imaping:
   token:
-    accessToken:
-      timeToKillInSeconds: PT2H
+        accessToken:
+          timeToKillInSeconds: PT2H
 
 # 场景 2: 移动应用 (7 天)
 imaping:
   token:
-    accessToken:
-      timeToKillInSeconds: PT168H  # 7 * 24 = 168 小时
+        accessToken:
+          timeToKillInSeconds: PT168H  # 7 * 24 = 168 小时
 
 # 场景 3: 高安全性场景 (30 分钟)
 imaping:
   token:
-    accessToken:
-      timeToKillInSeconds: PT30M
+        accessToken:
+          timeToKillInSeconds: PT30M
 ```
 
 ---
@@ -486,8 +486,8 @@ spring:
 
 imaping:
   token:
-    # Token 基础配置
-    accessTokenName: dev_access_token
+        # Token 基础配置
+        accessTokenName: dev_access_token
 
     # 访问令牌配置
     accessToken:
@@ -519,7 +519,7 @@ imaping:
 # 日志配置 (可选)
 logging:
   level:
-    com.imaping.token: DEBUG
+    imaping.token: DEBUG
 ```
 
 ### 6.2 生产环境配置
@@ -550,8 +550,8 @@ spring:
 
 imaping:
   token:
-    # Token 基础配置
-    accessTokenName: access_token
+        # Token 基础配置
+        accessTokenName: access_token
 
     # 访问令牌配置
     accessToken:
@@ -576,7 +576,7 @@ imaping:
 # 日志配置
 logging:
   level:
-    com.imaping.token: INFO
+    imaping.token: INFO
 ```
 
 ### 6.3 集群部署配置
@@ -612,8 +612,8 @@ spring:
 
 imaping:
   token:
-    # Token 基础配置
-    accessTokenName: access_token
+        # Token 基础配置
+        accessTokenName: access_token
 
     # 访问令牌配置
     accessToken:
@@ -638,8 +638,8 @@ imaping:
 # 日志配置
 logging:
   level:
-    com.imaping.token: INFO
-    com.imaping.token.api.registry: DEBUG  # 注册表操作日志
+    imaping.token: INFO
+    io.github.imaping.token.api.registry: DEBUG  # 注册表操作日志
 ```
 
 ### 6.4 性能优化配置
@@ -670,8 +670,8 @@ spring:
 
 imaping:
   token:
-    # Token 基础配置
-    accessTokenName: access_token
+        # Token 基础配置
+        accessTokenName: access_token
 
     # 访问令牌配置
     accessToken:
@@ -699,7 +699,7 @@ imaping:
 # 日志配置 (减少日志输出)
 logging:
   level:
-    com.imaping.token: WARN
+    imaping.token: WARN
 ```
 
 ---
@@ -732,3 +732,7 @@ logging:
 - [架构文档](architecture.md)
 - [API 使用指南](api-guide.md)
 - [快速开始](quick-start.md)
+
+
+
+

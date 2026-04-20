@@ -103,7 +103,7 @@ imaping-token-parent
 
 **核心包结构**:
 ```
-com.imaping.token.api
+io.github.imaping.token.api
 ├── model/             # Token 模型
 ├── registry/          # Token 注册表
 ├── factory/           # Token 工厂
@@ -516,11 +516,11 @@ Authentication (类)
 ```yaml
 imaping:
   token:
-    scheduling:
-      enabled: true                 # 启用调度
-      pool-size: 5                  # 线程池大小
-      repeatInterval: 120000        # 清理间隔 (毫秒)
-      startDelay: 15000             # 启动延迟 (毫秒)
+        scheduling:
+          enabled: true                 # 启用调度
+          pool-size: 5                  # 线程池大小
+          repeatInterval: 120000        # 清理间隔 (毫秒)
+          startDelay: 15000             # 启动延迟 (毫秒)
 ```
 
 ---
@@ -799,3 +799,7 @@ public class CustomSecurityConfig extends TokenSecurityConfig {
 **更新频率**: 架构变更时更新
 **问题反馈**: 请通过项目 Issue 提交
 **最后更新**: 2025-10-12
+
+
+
+

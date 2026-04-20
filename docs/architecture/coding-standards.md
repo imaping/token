@@ -71,7 +71,7 @@
 
 标准包结构:
 ```
-com.imaping.token.<module>
+io.github.imaping.token.<module>
 ├── model/             # 数据模型
 ├── registry/          # 注册表实现
 ├── factory/           # 工厂类
@@ -219,8 +219,8 @@ public class TokenApiConfig {
 #### spring.factories / AutoConfiguration.imports
 ```
 # META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports
-com.imaping.token.api.config.TokenApiConfig
-com.imaping.token.core.TokenCoreAutoConfig
+io.github.imaping.token.api.config.TokenApiConfig
+io.github.imaping.token.core.TokenCoreAutoConfig
 ```
 
 ### 3.2 配置属性
@@ -488,8 +488,8 @@ UniqueTokenIdGenerator tokenIdGenerator = new DefaultUniqueTokenIdGenerator(
 ```yaml
 imaping:
   token:
-    accessToken:
-      timeToKillInSeconds: 7200  # 2小时 (生产环境推荐)
+        accessToken:
+          timeToKillInSeconds: 7200  # 2小时 (生产环境推荐)
 ```
 
 - ✅ 短期 Token: 1-4 小时
@@ -587,3 +587,7 @@ spring:
 **维护责任**: 架构团队
 **更新频率**: 每次编码规范变更
 **审核流程**: 技术委员会批准
+
+
+
+

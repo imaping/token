@@ -62,8 +62,8 @@ TTL: 7200秒 (2小时)
 ```yaml
 imaping:
   token:
-    accessToken:
-      timeToKillInSeconds: 7200  # 2 小时无活动后过期
+        accessToken:
+          timeToKillInSeconds: 7200  # 2 小时无活动后过期
 ```
 
 #### 推荐过期时间
@@ -149,8 +149,8 @@ public TokenFactory hardTimeoutTokenFactory(
 ```java
 package com.example.expiration;
 
-import com.imaping.token.api.expiration.AbstractTokenExpirationPolicy;
-import com.imaping.token.api.model.Token;
+import io.github.imaping.token.api.expiration.AbstractTokenExpirationPolicy;
+import io.github.imaping.token.api.model.Token;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -203,8 +203,8 @@ Caffeine 是高性能的本地缓存库,可显著提升 Token 查询性能。
 package com.example.config;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
-import com.imaping.token.api.registry.CachingTokenRegistry;
-import com.imaping.token.api.registry.TokenRegistry;
+import io.github.imaping.token.api.registry.CachingTokenRegistry;
+import io.github.imaping.token.api.registry.TokenRegistry;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -735,8 +735,8 @@ tail -f /var/log/app/application.log | grep "Token"
 ```yaml
 imaping:
   token:
-    accessToken:
-      timeToKillInSeconds: 7200  # 检查此配置
+        accessToken:
+          timeToKillInSeconds: 7200  # 检查此配置
 ```
 
 **步骤 2**: 检查服务器时区
@@ -877,10 +877,10 @@ RedisTokenRegistry did not match:
 ```yaml
 imaping:
   token:
-    enabled: true  # 确保启用
-    registry:
-      redis:
-        enabled: true  # 如需 Redis,确保启用
+        enabled: true  # 确保启用
+        registry:
+          redis:
+            enabled: true  # 如需 Redis,确保启用
 ```
 
 **步骤 3**: 检查 Bean 是否注入
@@ -927,7 +927,7 @@ public class DebugController {
 ```java
 package com.example.metrics;
 
-import com.imaping.token.api.registry.TokenRegistry;
+import io.github.imaping.token.api.registry.TokenRegistry;
 import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
 import jakarta.annotation.PostConstruct;
@@ -1126,8 +1126,8 @@ groups:
 # application.yml
 logging:
   level:
-    com.imaping.token: INFO                       # Token 组件日志级别
-    com.imaping.token.api.registry: DEBUG         # Registry 详细日志
+    imaping.token: INFO                       # Token 组件日志级别
+    io.github.imaping.token.api.registry: DEBUG         # Registry 详细日志
     org.springframework.security: INFO            # Security 日志
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
@@ -1320,20 +1320,20 @@ spring:
 
 imaping:
   token:
-    registry:
-      redis:
-        enabled: false  # 开发环境使用内存存储
-      inMemory:
-        cache: true
-    accessToken:
-      timeToKillInSeconds: 3600  # 1 小时(开发环境可短一些)
-    scheduling:
-      enabled: true
-      repeatInterval: 60000  # 1 分钟清理一次
+        registry:
+          redis:
+            enabled: false  # 开发环境使用内存存储
+          inMemory:
+            cache: true
+        accessToken:
+          timeToKillInSeconds: 3600  # 1 小时(开发环境可短一些)
+        scheduling:
+          enabled: true
+          repeatInterval: 60000  # 1 分钟清理一次
 
 logging:
   level:
-    com.imaping.token: DEBUG  # 开发环境启用详细日志
+    imaping.token: DEBUG  # 开发环境启用详细日志
 ```
 
 ---
@@ -1355,19 +1355,19 @@ spring:
 
 imaping:
   token:
-    registry:
-      redis:
-        enabled: true
-      core:
-        enable-locking: true  # 测试分布式锁
-    accessToken:
-      timeToKillInSeconds: 7200
-    scheduling:
-      enabled: false
+        registry:
+          redis:
+            enabled: true
+          core:
+            enable-locking: true  # 测试分布式锁
+        accessToken:
+          timeToKillInSeconds: 7200
+        scheduling:
+          enabled: false
 
 logging:
   level:
-    com.imaping.token: INFO
+    imaping.token: INFO
 ```
 
 ---
@@ -1417,3 +1417,7 @@ logging:
 **最后更新**: 2025-10-12
 **文档版本**: v1.0
 **反馈渠道**: docs@example.com
+
+
+
+

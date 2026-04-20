@@ -349,13 +349,13 @@ imaping-token-test/
 ### 3.1 包命名规则
 
 ```
-com.imaping.token.<module>.<功能>
+io.github.imaping.token.<module>.<功能>
 ```
 
 **示例**:
-- `com.imaping.token.api.model` - Token 模型
-- `com.imaping.token.api.registry` - Token 注册表
-- `com.imaping.token.core.util` - 工具类
+- `io.github.imaping.token.api.model` - Token 模型
+- `io.github.imaping.token.api.registry` - Token 注册表
+- `io.github.imaping.token.core.util` - 工具类
 
 ### 3.2 标准包结构
 
@@ -384,10 +384,10 @@ com.imaping.token.<module>.<功能>
 ```
 META-INF/spring/
 └── org.springframework.boot.autoconfigure.AutoConfiguration.imports
-    ├── com.imaping.token.api.config.TokenApiConfig
-    ├── com.imaping.token.core.TokenCoreAutoConfig
-    ├── com.imaping.token.redis.registry.config.TokenConfig
-    └── com.imaping.token.resource.client.config.ResourceClientConfig
+    ├── io.github.imaping.token.api.config.TokenApiConfig
+    ├── io.github.imaping.token.core.TokenCoreAutoConfig
+    ├── io.github.imaping.token.redis.registry.config.TokenConfig
+    └── io.github.imaping.token.resource.client.config.ResourceClientConfig
 ```
 
 ### 4.2 配置元数据
@@ -621,3 +621,7 @@ public class CustomTokenAuthenticationFilter extends TokenAuthenticationFilter {
 - [编码规范](coding-standards.md)
 - [技术栈](tech-stack.md)
 - [架构文档](../architecture.md)
+
+
+
+

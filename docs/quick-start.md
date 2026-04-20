@@ -206,23 +206,23 @@ server:
 
 imaping:
   token:
-    accessTokenName: access_token
-    registry:
-      redis:
-        enabled: true                      # 启用 Redis 存储
-      core:
-        enableLocking: true                # 启用 Redis 分布式锁
-      concurrentSessions:
-        enabled: true                      # 启用同账号并发会话控制
-        maxSessions: 1                     # 单账号只允许 1 个 TimeoutAccessToken 在线
-        overflowStrategy: INVALIDATE_OLDEST
-        enabledTokenTypes:
-          - TimeoutAccessToken
-      cleaner:
-        schedule:
-          enabled: false                   # Redis TTL 自动过期,无需定时清理
-    accessToken:
-      timeToKillInSeconds: 7200            # Token 有效期 2 小时
+        accessTokenName: access_token
+        registry:
+          redis:
+            enabled: true                      # 启用 Redis 存储
+          core:
+            enableLocking: true                # 启用 Redis 分布式锁
+          concurrentSessions:
+            enabled: true                      # 启用同账号并发会话控制
+            maxSessions: 1                     # 单账号只允许 1 个 TimeoutAccessToken 在线
+            overflowStrategy: INVALIDATE_OLDEST
+            enabledTokenTypes:
+              - TimeoutAccessToken
+          cleaner:
+            schedule:
+              enabled: false                   # Redis TTL 自动过期,无需定时清理
+        accessToken:
+          timeToKillInSeconds: 7200            # Token 有效期 2 小时
 ```
 
 ---
@@ -252,15 +252,15 @@ public class TokenDemoApplication {
 ```java
 package com.example.demo.controller;
 
-import com.imaping.token.api.authentication.Authentication;
-import com.imaping.token.api.authentication.principal.Principal;
-import com.imaping.token.api.factory.TimeoutTokenFactory;
-import com.imaping.token.api.factory.TokenFactory;
-import com.imaping.token.api.model.TimeoutAccessToken;
-import com.imaping.token.api.model.Token;
-import com.imaping.token.api.registry.TokenRegistry;
-import com.imaping.token.core.model.BaseUserInfo;
-import com.imaping.token.core.util.SecurityContextUtil;
+import io.github.imaping.token.api.authentication.Authentication;
+import io.github.imaping.token.api.authentication.principal.Principal;
+import io.github.imaping.token.api.factory.TimeoutTokenFactory;
+import io.github.imaping.token.api.factory.TokenFactory;
+import io.github.imaping.token.api.model.TimeoutAccessToken;
+import io.github.imaping.token.api.model.Token;
+import io.github.imaping.token.api.registry.TokenRegistry;
+import io.github.imaping.token.core.model.BaseUserInfo;
+import io.github.imaping.token.core.util.SecurityContextUtil;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.*;
 
@@ -351,7 +351,7 @@ public class LoginController {
 ```java
 package com.example.demo.controller;
 
-import com.imaping.token.core.util.SecurityContextUtil;
+import io.github.imaping.token.core.util.SecurityContextUtil;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -395,7 +395,7 @@ public class ApiController {
 ```java
 package com.example.demo.config;
 
-import com.imaping.token.resource.client.config.TokenSecurityConfig;
+import io.github.imaping.token.resource.client.config.TokenSecurityConfig;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
@@ -438,16 +438,16 @@ server:
 
 imaping:
   token:
-    accessTokenName: access_token
-    registry:
-      redis:
-        enabled: false
-      cleaner:
-        schedule:
-          enabled: true
-          repeatInterval: PT2M
-    accessToken:
-      timeToKillInSeconds: 7200
+        accessTokenName: access_token
+        registry:
+          redis:
+            enabled: false
+          cleaner:
+            schedule:
+              enabled: true
+              repeatInterval: PT2M
+        accessToken:
+          timeToKillInSeconds: 7200
 ```
 
 ### 5.3 运行应用
@@ -524,9 +524,9 @@ spring:
 
 imaping:
   token:
-    registry:
-      redis:
-        enabled: true  # 启用 Redis
+        registry:
+          redis:
+            enabled: true  # 启用 Redis
 ```
 
 ### Q2: 如何自定义 Token 有效期?
@@ -536,8 +536,8 @@ imaping:
 ```yaml
 imaping:
   token:
-    accessToken:
-      timeToKillInSeconds: 3600  # 1 小时
+        accessToken:
+          timeToKillInSeconds: 3600  # 1 小时
 ```
 
 ### Q3: 如何获取当前登录用户信息?
@@ -545,7 +545,7 @@ imaping:
 **A**: 使用 `SecurityContextUtil` 工具类:
 
 ```java
-import com.imaping.token.core.util.SecurityContextUtil;
+import io.github.imaping.token.core.util.SecurityContextUtil;
 
 // 获取用户信息
 BaseUserInfo userInfo = SecurityContextUtil.getCurrentUserInfo();
@@ -564,17 +564,17 @@ String token = SecurityContextUtil.getCurrentToken();
 ```yaml
 imaping:
   token:
-    registry:
-      redis:
-        enabled: true
-      core:
-        enableLocking: true
-      concurrentSessions:
-        enabled: true
-        maxSessions: 1
-        overflowStrategy: INVALIDATE_OLDEST
-        enabledTokenTypes:
-          - TimeoutAccessToken
+        registry:
+          redis:
+            enabled: true
+          core:
+            enableLocking: true
+          concurrentSessions:
+            enabled: true
+            maxSessions: 1
+            overflowStrategy: INVALIDATE_OLDEST
+            enabledTokenTypes:
+              - TimeoutAccessToken
 ```
 
 多实例部署时必须让所有实例共享同一个 Redis,并保持 `enableLocking=true`,这样单账号单登才能在全局生效。
@@ -603,4 +603,8 @@ imaping:
 **文档维护**: imaping-token 团队
 **问题反馈**: 请通过项目 Issue 提交
 **最后更新**: 2025-10-12
+
+
+
+
 

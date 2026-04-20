@@ -363,18 +363,18 @@ spring:
 
 imaping:
   token:
-    accessTokenName: access_token
-    registry:
-      redis:
-        enabled: false              # 开发环境使用内存存储
-      inMemory:
-        cache: true
-        initialCapacity: 1000
-    accessToken:
-      timeToKillInSeconds: 7200     # 2小时
-    scheduling:
-      enabled: true
-      repeatInterval: 120000        # 2分钟清理一次
+        accessTokenName: access_token
+        registry:
+          redis:
+            enabled: false              # 开发环境使用内存存储
+          inMemory:
+            cache: true
+            initialCapacity: 1000
+        accessToken:
+          timeToKillInSeconds: 7200     # 2小时
+        scheduling:
+          enabled: true
+          repeatInterval: 120000        # 2分钟清理一次
 ```
 
 ### 13.2 application-prod.yml (生产环境)
@@ -397,16 +397,16 @@ spring:
 
 imaping:
   token:
-    accessTokenName: access_token
-    registry:
-      redis:
-        enabled: true               # 生产环境使用 Redis
-      core:
-        enable-locking: true        # 启用分布式锁
-    accessToken:
-      timeToKillInSeconds: 7200     # 2小时
-    scheduling:
-      enabled: false                # Redis 自动过期,无需定时清理
+        accessTokenName: access_token
+        registry:
+          redis:
+            enabled: true               # 生产环境使用 Redis
+          core:
+            enable-locking: true        # 启用分布式锁
+        accessToken:
+          timeToKillInSeconds: 7200     # 2小时
+        scheduling:
+          enabled: false                # Redis 自动过期,无需定时清理
 ```
 
 ---
@@ -468,3 +468,6 @@ imaping:
 - [编码规范](coding-standards.md)
 - [源码结构](source-tree.md)
 - [架构文档](../architecture.md)
+
+
+

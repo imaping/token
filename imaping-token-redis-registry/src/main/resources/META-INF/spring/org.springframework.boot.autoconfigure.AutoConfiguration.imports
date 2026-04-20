@@ -1,1 +1,2 @@
-com.imaping.token.redis.registry.config.TokenConfig
+io.github.imaping.token.redis.registry.config.TokenConfig
+

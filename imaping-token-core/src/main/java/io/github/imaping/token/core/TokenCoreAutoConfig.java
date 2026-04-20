@@ -1,0 +1,41 @@
+package io.github.imaping.token.core;
+
+import io.github.imaping.token.core.model.DefaultSecurityUserInfoContext;
+import io.github.imaping.token.core.model.DefaultUserInfoContext;
+import io.github.imaping.token.core.model.SecurityUserInfoContext;
+import io.github.imaping.token.core.model.UserInfoContext;
+import io.github.imaping.token.core.util.SecurityContextUtil;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+
+/**
+ * @author miaoj
+ */
+@Configuration
+@ComponentScan(basePackages = {
+        "io.github.imaping.token.core.model"
+})
+public class TokenCoreAutoConfig {
+
+    @Bean(name = UserInfoContext.BEAN_NAME)
+    @ConditionalOnMissingBean(name = UserInfoContext.BEAN_NAME)
+    public UserInfoContext<String> userInfoContext() {
+        return new DefaultUserInfoContext();
+    }
+
+    @Bean(name = SecurityUserInfoContext.BEAN_NAME)
+    @ConditionalOnMissingBean(name = SecurityUserInfoContext.BEAN_NAME)
+    public SecurityUserInfoContext<String> securityUserInfoContext() {
+        return new DefaultSecurityUserInfoContext();
+    }
+
+    @Bean
+    public SecurityContextUtil securityContextUtil(UserInfoContext<?> userInfoContext) {
+        final SecurityContextUtil securityContextUtil = new SecurityContextUtil();
+        securityContextUtil.setUserInfoContext(userInfoContext);
+        return securityContextUtil;
+    }
+}
+

@@ -1,2 +1,3 @@
-com.imaping.token.api.config.TokenApiConfig
-com.imaping.token.api.config.TokenSchedulingConfiguration
+io.github.imaping.token.api.config.TokenApiConfig
+io.github.imaping.token.api.config.TokenSchedulingConfiguration
+

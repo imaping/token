@@ -70,10 +70,10 @@ dependencies {
 ```java
 package com.example.config;
 
-import com.imaping.token.resource.client.config.TokenSecurityConfig;
-import com.imaping.token.api.factory.TokenFactory;
-import com.imaping.token.api.registry.TokenRegistry;
-import com.imaping.token.configuration.IMapingConfigurationProperties;
+import io.github.imaping.token.resource.client.config.TokenSecurityConfig;
+import io.github.imaping.token.api.factory.TokenFactory;
+import io.github.imaping.token.api.registry.TokenRegistry;
+import io.github.imaping.token.configuration.IMapingConfigurationProperties;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -178,12 +178,12 @@ public class CustomSecurityConfig extends TokenSecurityConfig {
 ```java
 package com.example.config;
 
-import com.imaping.token.api.factory.TokenFactory;
-import com.imaping.token.api.registry.TokenRegistry;
-import com.imaping.token.configuration.IMapingConfigurationProperties;
-import com.imaping.token.resource.client.authentication.TokenAuthenticationEntryPoint;
-import com.imaping.token.resource.client.authentication.TokenAuthenticationProvider;
-import com.imaping.token.resource.client.filter.TokenAuthenticationFilter;
+import io.github.imaping.token.api.factory.TokenFactory;
+import io.github.imaping.token.api.registry.TokenRegistry;
+import io.github.imaping.token.configuration.IMapingConfigurationProperties;
+import io.github.imaping.token.resource.client.authentication.TokenAuthenticationEntryPoint;
+import io.github.imaping.token.resource.client.authentication.TokenAuthenticationProvider;
+import io.github.imaping.token.resource.client.filter.TokenAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -445,10 +445,10 @@ src/main/java/com/example/
 ```java
 package com.example.controller;
 
-import com.imaping.token.api.authentication.Authentication;
-import com.imaping.token.api.factory.TokenFactory;
-import com.imaping.token.api.model.Token;
-import com.imaping.token.api.registry.TokenRegistry;
+import io.github.imaping.token.api.authentication.Authentication;
+import io.github.imaping.token.api.factory.TokenFactory;
+import io.github.imaping.token.api.model.Token;
+import io.github.imaping.token.api.registry.TokenRegistry;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -585,16 +585,16 @@ class LoginResponse {
 # imaping-token 配置
 imaping:
   token:
-    accessTokenName: access_token
-    registry:
-      redis:
-        enabled: true              # ✅ 启用 Redis 存储
-      core:
-        enable-locking: false      # 单机模式无需分布式锁
-    accessToken:
-      timeToKillInSeconds: 7200    # Token 过期时间 2 小时
-    scheduling:
-      enabled: false               # Redis 自动过期,无需定时清理
+        accessTokenName: access_token
+        registry:
+          redis:
+            enabled: true              # ✅ 启用 Redis 存储
+          core:
+            enable-locking: false      # 单机模式无需分布式锁
+        accessToken:
+          timeToKillInSeconds: 7200    # Token 过期时间 2 小时
+        scheduling:
+          enabled: false               # Redis 自动过期,无需定时清理
 
 # Spring Data Redis 配置
 spring:
@@ -646,11 +646,11 @@ Redis Cluster 模式适用于大规模分布式部署,提供自动分片和高�
 ```yaml
 imaping:
   token:
-    registry:
-      redis:
-        enabled: true
-      core:
-        enable-locking: true       # ✅ 启用分布式锁
+        registry:
+          redis:
+            enabled: true
+          core:
+            enable-locking: true       # ✅ 启用分布式锁
 
 spring:
   data:
@@ -688,11 +688,11 @@ Redis Sentinel 模式提供主从复制和自动故障转移。
 ```yaml
 imaping:
   token:
-    registry:
-      redis:
-        enabled: true
-      core:
-        enable-locking: true       # 启用分布式锁
+        registry:
+          redis:
+            enabled: true
+          core:
+            enable-locking: true       # 启用分布式锁
 
 spring:
   data:
@@ -799,8 +799,8 @@ Redis 存储自动利用 TTL(Time To Live)机制实现 Token 过期:
 ```yaml
 imaping:
   token:
-    accessToken:
-      timeToKillInSeconds: 7200  # 设置 TTL = 7200 秒(2 小时)
+        accessToken:
+          timeToKillInSeconds: 7200  # 设置 TTL = 7200 秒(2 小时)
 ```
 
 **工作原理**:
@@ -846,15 +846,15 @@ redis-cli TTL "imaping.token:4xY7k9zP2mQ1nR3s:user12345"
 ```yaml
 imaping:
   token:
-    registry:
-      redis:
-        enabled: false             # ❌ 禁用 Redis
-      inMemory:
-        cache: true                # ✅ 启用 Caffeine 缓存优化
-        initialCapacity: 1000      # 初始容量
-    scheduling:
-      enabled: true                # ✅ 启用定时清理
-      repeatInterval: 120000       # 2 分钟清理一次
+        registry:
+          redis:
+            enabled: false             # ❌ 禁用 Redis
+          inMemory:
+            cache: true                # ✅ 启用 Caffeine 缓存优化
+            initialCapacity: 1000      # 初始容量
+        scheduling:
+          enabled: true                # ✅ 启用定时清理
+          repeatInterval: 120000       # 2 分钟清理一次
 ```
 
 **优势**: 无需启动 Redis,开发调试方便
@@ -869,15 +869,15 @@ imaping:
 ```yaml
 imaping:
   token:
-    registry:
-      redis:
-        enabled: false
-      inMemory:
-        cache: true
-        initialCapacity: 5000      # 根据用户量调整
-    scheduling:
-      enabled: true
-      repeatInterval: 60000        # 1 分钟清理一次
+        registry:
+          redis:
+            enabled: false
+          inMemory:
+            cache: true
+            initialCapacity: 5000      # 根据用户量调整
+        scheduling:
+          enabled: true
+          repeatInterval: 60000        # 1 分钟清理一次
 ```
 
 **适用条件**:
@@ -895,13 +895,13 @@ imaping:
 ```yaml
 imaping:
   token:
-    registry:
-      redis:
-        enabled: true              # ✅ 启用 Redis
-      core:
-        enable-locking: true       # ✅ 启用分布式锁
-    scheduling:
-      enabled: false               # Redis 自动过期
+        registry:
+          redis:
+            enabled: true              # ✅ 启用 Redis
+          core:
+            enable-locking: true       # ✅ 启用分布式锁
+        scheduling:
+          enabled: false               # Redis 自动过期
 
 spring:
   data:
@@ -932,11 +932,11 @@ spring:
 ```yaml
 imaping:
   token:
-    registry:
-      redis:
-        enabled: true
-      core:
-        enable-locking: true
+        registry:
+          redis:
+            enabled: true
+          core:
+            enable-locking: true
 
 spring:
   data:
@@ -985,16 +985,16 @@ spring:
 # 从这个配置
 imaping:
   token:
-    registry:
-      redis:
-        enabled: false  # ❌ 内存存储
+        registry:
+          redis:
+            enabled: false  # ❌ 内存存储
 
 # 改为这个配置
 imaping:
   token:
-    registry:
-      redis:
-        enabled: true   # ✅ Redis 存储
+        registry:
+          redis:
+            enabled: true   # ✅ Redis 存储
 
 spring:
   data:
@@ -1136,20 +1136,20 @@ server {
 ```yaml
 imaping:
   token:
-    registry:
-      redis:
-        enabled: true              # ✅ 启用 Redis 共享存储
-      core:
-        enableLocking: true        # ✅ 启用 Redis 分布式锁(多实例必须)
-      concurrentSessions:
-        enabled: true              # ✅ 启用同账号并发会话控制
-        maxSessions: 1             # 单账号单登
-        overflowStrategy: INVALIDATE_OLDEST
-        enabledTokenTypes:
-          - TimeoutAccessToken
-      cleaner:
-        schedule:
-          enabled: false           # Redis TTL 自动过期,无需定时清理
+        registry:
+          redis:
+            enabled: true              # ✅ 启用 Redis 共享存储
+          core:
+            enableLocking: true        # ✅ 启用 Redis 分布式锁(多实例必须)
+          concurrentSessions:
+            enabled: true              # ✅ 启用同账号并发会话控制
+            maxSessions: 1             # 单账号单登
+            overflowStrategy: INVALIDATE_OLDEST
+            enabledTokenTypes:
+              - TimeoutAccessToken
+          cleaner:
+            schedule:
+              enabled: false           # Redis TTL 自动过期,无需定时清理
 
 spring:
   data:
@@ -1344,7 +1344,7 @@ curl http://localhost:8080/actuator/metrics
 ```java
 package com.example.actuator;
 
-import com.imaping.token.api.registry.TokenRegistry;
+import io.github.imaping.token.api.registry.TokenRegistry;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.stereotype.Component;
@@ -1451,7 +1451,7 @@ curl http://localhost:8080/actuator/prometheus
 ```java
 package com.example.metrics;
 
-import com.imaping.token.api.registry.TokenRegistry;
+import io.github.imaping.token.api.registry.TokenRegistry;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Gauge;
 import org.springframework.stereotype.Component;
@@ -1553,16 +1553,16 @@ public class ActuatorSecurityConfig extends TokenSecurityConfig {
 # application-prod.yml
 imaping:
   token:
-    accessTokenName: access_token
-    registry:
-      redis:
-        enabled: true
-      core:
-        enable-locking: true
-    accessToken:
-      timeToKillInSeconds: 7200
-    scheduling:
-      enabled: false
+        accessTokenName: access_token
+        registry:
+          redis:
+            enabled: true
+          core:
+            enable-locking: true
+        accessToken:
+          timeToKillInSeconds: 7200
+        scheduling:
+          enabled: false
 
 spring:
   data:
@@ -1678,11 +1678,11 @@ spring:
 # 所有微服务使用相同配置
 imaping:
   token:
-    registry:
-      redis:
-        enabled: true
-      core:
-        enable-locking: true
+        registry:
+          redis:
+            enabled: true
+          core:
+            enable-locking: true
 
 spring:
   data:
@@ -1775,4 +1775,8 @@ public class HybridSecurityConfig {
 **最后更新**: 2025-10-12
 **文档版本**: v1.0
 **反馈渠道**: docs@example.com
+
+
+
+
 

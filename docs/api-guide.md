@@ -47,8 +47,8 @@ imaping-token 提供三个核心 API:
 ```java
 package com.example.service;
 
-import com.imaping.token.api.registry.TokenRegistry;
-import com.imaping.token.api.factory.TokenFactory;
+import io.github.imaping.token.api.registry.TokenRegistry;
+import io.github.imaping.token.api.factory.TokenFactory;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -83,12 +83,12 @@ void addToken(Token token) throws Exception;
 ```java
 package com.example.service;
 
-import com.imaping.token.api.authentication.Authentication;
-import com.imaping.token.api.authentication.principal.Principal;
-import com.imaping.token.api.factory.TimeoutTokenFactory;
-import com.imaping.token.api.model.TimeoutAccessToken;
-import com.imaping.token.api.registry.TokenRegistry;
-import com.imaping.token.core.model.BaseUserInfo;
+import io.github.imaping.token.api.authentication.Authentication;
+import io.github.imaping.token.api.authentication.principal.Principal;
+import io.github.imaping.token.api.factory.TimeoutTokenFactory;
+import io.github.imaping.token.api.model.TimeoutAccessToken;
+import io.github.imaping.token.api.registry.TokenRegistry;
+import io.github.imaping.token.core.model.BaseUserInfo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -169,17 +169,17 @@ public class TokenService {
 ```yaml
 imaping:
   token:
-    registry:
-      redis:
-        enabled: true
-      core:
-        enableLocking: true
-      concurrentSessions:
-        enabled: true
-        maxSessions: 1
-        overflowStrategy: INVALIDATE_OLDEST
-        enabledTokenTypes:
-          - TimeoutAccessToken
+        registry:
+          redis:
+            enabled: true
+          core:
+            enableLocking: true
+          concurrentSessions:
+            enabled: true
+            maxSessions: 1
+            overflowStrategy: INVALIDATE_OLDEST
+            enabledTokenTypes:
+              - TimeoutAccessToken
 ```
 
 多实例部署下,上面这组配置会让 `addToken()` 在写入前通过 Redis 分布式锁完成全局并发会话控制。
@@ -200,10 +200,10 @@ Token getToken(String tokenId, Predicate<Token> predicate);
 ```java
 package com.example.service;
 
-import com.imaping.token.api.model.Token;
-import com.imaping.token.api.model.TimeoutAccessToken;
-import com.imaping.token.api.model.HardTimeoutToken;
-import com.imaping.token.api.registry.TokenRegistry;
+import io.github.imaping.token.api.model.Token;
+import io.github.imaping.token.api.model.TimeoutAccessToken;
+import io.github.imaping.token.api.model.HardTimeoutToken;
+import io.github.imaping.token.api.registry.TokenRegistry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -318,9 +318,9 @@ Token updateToken(Token token) throws Exception;
 ```java
 package com.example.service;
 
-import com.imaping.token.api.model.Token;
-import com.imaping.token.api.model.TimeoutAccessToken;
-import com.imaping.token.api.registry.TokenRegistry;
+import io.github.imaping.token.api.model.Token;
+import io.github.imaping.token.api.model.TimeoutAccessToken;
+import io.github.imaping.token.api.registry.TokenRegistry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -448,8 +448,8 @@ long deleteAll();
 ```java
 package com.example.service;
 
-import com.imaping.token.api.model.Token;
-import com.imaping.token.api.registry.TokenRegistry;
+import io.github.imaping.token.api.model.Token;
+import io.github.imaping.token.api.registry.TokenRegistry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -586,8 +586,8 @@ public class TokenDeletionService {
 ```java
 package com.example.service;
 
-import com.imaping.token.api.model.Token;
-import com.imaping.token.api.registry.TokenRegistry;
+import io.github.imaping.token.api.model.Token;
+import io.github.imaping.token.api.registry.TokenRegistry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -723,11 +723,11 @@ public class TokenStatisticsService {
 ```java
 package com.example.config;
 
-import com.imaping.token.api.factory.DefaultTokenFactory;
-import com.imaping.token.api.factory.TimeoutTokenFactory;
-import com.imaping.token.api.factory.HardTimeoutTokenFactory;
-import com.imaping.token.api.model.TimeoutAccessToken;
-import com.imaping.token.api.model.HardTimeoutToken;
+import io.github.imaping.token.api.factory.DefaultTokenFactory;
+import io.github.imaping.token.api.factory.TimeoutTokenFactory;
+import io.github.imaping.token.api.factory.HardTimeoutTokenFactory;
+import io.github.imaping.token.api.model.TimeoutAccessToken;
+import io.github.imaping.token.api.model.HardTimeoutToken;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -758,11 +758,11 @@ public class TokenFactoryConfig {
 ```java
 package com.example.service;
 
-import com.imaping.token.api.authentication.Authentication;
-import com.imaping.token.api.factory.DefaultTokenFactory;
-import com.imaping.token.api.factory.TokenFactory;
-import com.imaping.token.api.model.TimeoutAccessToken;
-import com.imaping.token.api.model.HardTimeoutToken;
+import io.github.imaping.token.api.authentication.Authentication;
+import io.github.imaping.token.api.factory.DefaultTokenFactory;
+import io.github.imaping.token.api.factory.TokenFactory;
+import io.github.imaping.token.api.model.TimeoutAccessToken;
+import io.github.imaping.token.api.model.HardTimeoutToken;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -800,11 +800,11 @@ public class TokenCreationService {
 ```java
 package com.example.service;
 
-import com.imaping.token.api.authentication.Authentication;
-import com.imaping.token.api.authentication.principal.Principal;
-import com.imaping.token.api.factory.TimeoutTokenFactory;
-import com.imaping.token.api.model.TimeoutAccessToken;
-import com.imaping.token.core.model.BaseUserInfo;
+import io.github.imaping.token.api.authentication.Authentication;
+import io.github.imaping.token.api.authentication.principal.Principal;
+import io.github.imaping.token.api.factory.TimeoutTokenFactory;
+import io.github.imaping.token.api.model.TimeoutAccessToken;
+import io.github.imaping.token.core.model.BaseUserInfo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -882,11 +882,11 @@ public class TimeoutTokenService {
 ```java
 package com.example.service;
 
-import com.imaping.token.api.authentication.Authentication;
-import com.imaping.token.api.authentication.principal.Principal;
-import com.imaping.token.api.factory.HardTimeoutTokenFactory;
-import com.imaping.token.api.model.HardTimeoutToken;
-import com.imaping.token.core.model.BaseUserInfo;
+import io.github.imaping.token.api.authentication.Authentication;
+import io.github.imaping.token.api.authentication.principal.Principal;
+import io.github.imaping.token.api.factory.HardTimeoutTokenFactory;
+import io.github.imaping.token.api.model.HardTimeoutToken;
+import io.github.imaping.token.core.model.BaseUserInfo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -985,9 +985,9 @@ public class HardTimeoutTokenService {
 ```java
 package com.example.generator;
 
-import com.imaping.token.api.generator.UniqueTokenIdGenerator;
-import com.imaping.token.api.generator.RandomStringGenerator;
-import com.imaping.token.api.generator.Base64RandomStringGenerator;
+import io.github.imaping.token.api.generator.UniqueTokenIdGenerator;
+import io.github.imaping.token.api.generator.RandomStringGenerator;
+import io.github.imaping.token.api.generator.Base64RandomStringGenerator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -1000,7 +1000,7 @@ public class TokenIdGeneratorConfig {
     @Bean
     public UniqueTokenIdGenerator customTokenIdGenerator() {
         RandomStringGenerator randomStringGenerator = new Base64RandomStringGenerator();
-        return new com.imaping.token.api.generator.DefaultUniqueTokenIdGenerator(
+        return new io.github.imaping.token.api.generator.DefaultUniqueTokenIdGenerator(
                 randomStringGenerator,
                 32  // Token ID 长度 (32 字符 = 256 位熵)
         );
@@ -1012,7 +1012,7 @@ public class TokenIdGeneratorConfig {
     @Bean
     public UniqueTokenIdGenerator longTokenIdGenerator() {
         RandomStringGenerator randomStringGenerator = new Base64RandomStringGenerator();
-        return new com.imaping.token.api.generator.DefaultUniqueTokenIdGenerator(
+        return new io.github.imaping.token.api.generator.DefaultUniqueTokenIdGenerator(
                 randomStringGenerator,
                 64  // 64 字符 = 512 位熵
         );
@@ -1025,7 +1025,7 @@ public class TokenIdGeneratorConfig {
 ```java
 package com.example.service;
 
-import com.imaping.token.api.generator.UniqueTokenIdGenerator;
+import io.github.imaping.token.api.generator.UniqueTokenIdGenerator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -1077,7 +1077,7 @@ public class CustomTokenIdService {
 ```java
 package com.example.token.model;
 
-import com.imaping.token.api.model.Token;
+import io.github.imaping.token.api.model.Token;
 
 /**
  * 刷新令牌接口
@@ -1112,9 +1112,9 @@ public interface RefreshToken extends Token {
 ```java
 package com.example.token.model;
 
-import com.imaping.token.api.authentication.Authentication;
-import com.imaping.token.api.expiration.ExpirationPolicy;
-import com.imaping.token.api.model.AbstractToken;
+import io.github.imaping.token.api.authentication.Authentication;
+import io.github.imaping.token.api.expiration.ExpirationPolicy;
+import io.github.imaping.token.api.model.AbstractToken;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -1188,12 +1188,12 @@ package com.example.token.factory;
 
 import com.example.token.model.DefaultRefreshToken;
 import com.example.token.model.RefreshToken;
-import com.imaping.token.api.authentication.Authentication;
-import com.imaping.token.api.expiration.ExpirationPolicy;
-import com.imaping.token.api.expiration.HardTimeoutExpirationPolicy;
-import com.imaping.token.api.factory.TokenFactory;
-import com.imaping.token.api.generator.UniqueTokenIdGenerator;
-import com.imaping.token.api.model.Token;
+import io.github.imaping.token.api.authentication.Authentication;
+import io.github.imaping.token.api.expiration.ExpirationPolicy;
+import io.github.imaping.token.api.expiration.HardTimeoutExpirationPolicy;
+import io.github.imaping.token.api.factory.TokenFactory;
+import io.github.imaping.token.api.generator.UniqueTokenIdGenerator;
+import io.github.imaping.token.api.model.Token;
 import lombok.RequiredArgsConstructor;
 
 import java.time.Clock;
@@ -1252,8 +1252,8 @@ package com.example.config;
 
 import com.example.token.factory.RefreshTokenFactory;
 import com.example.token.model.RefreshToken;
-import com.imaping.token.api.factory.DefaultTokenFactory;
-import com.imaping.token.api.generator.UniqueTokenIdGenerator;
+import io.github.imaping.token.api.factory.DefaultTokenFactory;
+import io.github.imaping.token.api.generator.UniqueTokenIdGenerator;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -1293,9 +1293,9 @@ package com.example.service;
 
 import com.example.token.factory.RefreshTokenFactory;
 import com.example.token.model.RefreshToken;
-import com.imaping.token.api.authentication.Authentication;
-import com.imaping.token.api.model.TimeoutAccessToken;
-import com.imaping.token.api.registry.TokenRegistry;
+import io.github.imaping.token.api.authentication.Authentication;
+import io.github.imaping.token.api.model.TimeoutAccessToken;
+import io.github.imaping.token.api.registry.TokenRegistry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -1417,8 +1417,8 @@ public class RefreshTokenService {
 ```java
 package com.example.expiration;
 
-import com.imaping.token.api.expiration.ExpirationPolicy;
-import com.imaping.token.api.model.Token;
+import io.github.imaping.token.api.expiration.ExpirationPolicy;
+import io.github.imaping.token.api.model.Token;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -1515,8 +1515,8 @@ public class WorkingHoursExpirationPolicy implements ExpirationPolicy, Serializa
 ```java
 package com.example.expiration;
 
-import com.imaping.token.api.expiration.ExpirationPolicy;
-import com.imaping.token.api.expiration.ExpirationPolicyBuilder;
+import io.github.imaping.token.api.expiration.ExpirationPolicy;
+import io.github.imaping.token.api.expiration.ExpirationPolicyBuilder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -1561,12 +1561,12 @@ package com.example.factory;
 
 import com.example.expiration.WorkingHoursExpirationPolicyBuilder;
 import com.example.token.model.WorkingHoursToken;
-import com.imaping.token.api.authentication.Authentication;
-import com.imaping.token.api.expiration.ExpirationPolicy;
-import com.imaping.token.api.factory.TokenFactory;
-import com.imaping.token.api.generator.UniqueTokenIdGenerator;
-import com.imaping.token.api.model.AbstractToken;
-import com.imaping.token.api.model.Token;
+import io.github.imaping.token.api.authentication.Authentication;
+import io.github.imaping.token.api.expiration.ExpirationPolicy;
+import io.github.imaping.token.api.factory.TokenFactory;
+import io.github.imaping.token.api.generator.UniqueTokenIdGenerator;
+import io.github.imaping.token.api.model.AbstractToken;
+import io.github.imaping.token.api.model.Token;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -1620,9 +1620,9 @@ public class WorkingHoursTokenFactory implements TokenFactory {
 package com.example.service;
 
 import com.example.factory.WorkingHoursTokenFactory;
-import com.imaping.token.api.authentication.Authentication;
-import com.imaping.token.api.model.Token;
-import com.imaping.token.api.registry.TokenRegistry;
+import io.github.imaping.token.api.authentication.Authentication;
+import io.github.imaping.token.api.model.Token;
+import io.github.imaping.token.api.registry.TokenRegistry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -1798,3 +1798,7 @@ public void cleanupExpiredTokens() {
 - [配置参考](configuration.md)
 - [快速开始](quick-start.md)
 - [扩展点文档](architecture/8-扩展点.md)
+
+
+
+

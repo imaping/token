@@ -1,2 +1,3 @@
-com.imaping.token.resource.client.config.ResourceClientConfig
-com.imaping.token.resource.client.config.TokenSecurityConfig
+io.github.imaping.token.resource.client.config.ResourceClientConfig
+io.github.imaping.token.resource.client.config.TokenSecurityConfig
+

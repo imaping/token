@@ -77,3 +77,6 @@ mvn -P release-central -DskipTests -pl '!imaping-token-test' -am deploy
 - 开发者邮箱是否需要替换为你最终对外公开的邮箱。
 - 版本号是否需要在发布前提升。
 - Sonatype Portal 中的 namespace 是否已经完成验证。
+
+
+
