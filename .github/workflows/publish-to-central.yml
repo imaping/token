@@ -54,6 +54,6 @@ jobs:
         run: gpg --batch --list-secret-keys --keyid-format LONG
 
       - name: Build and publish to Maven Central
-        run: mvn --batch-mode -P release-central -DskipTests deploy
+        run: mvn --batch-mode -P release-central -DskipTests -pl '!imaping-token-test' -am deploy
         env:
           MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
