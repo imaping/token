@@ -52,7 +52,8 @@ mvn -P release-central -DskipTests -Dgpg.skip=true -Dcentral.skipPublishing=true
 执行正式发布:
 
 ```bash
-mvn -P release-central -DskipTests -Dgpg.passphrase=你的口令 deploy
+set MAVEN_GPG_PASSPHRASE=你的口令
+mvn -P release-central -DskipTests deploy
 ```
 
 说明:
@@ -60,6 +61,7 @@ mvn -P release-central -DskipTests -Dgpg.passphrase=你的口令 deploy
 - `release-central` 会自动附加 `sources`、`javadocs` 并执行 GPG 签名。
 - `imaping-token-test` 已被排除，不会上传到 Central。
 - 发布完成后，插件会等待组件进入 `published` 状态。
+- 不建议使用 `-Dgpg.passphrase=...`，因为该方式已被 Maven GPG Plugin 标记为不推荐。
 
 ## 5. GitHub Actions Secrets
 
