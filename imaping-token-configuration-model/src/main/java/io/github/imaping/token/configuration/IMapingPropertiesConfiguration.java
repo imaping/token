@@ -7,7 +7,10 @@ import org.springframework.context.annotation.Configuration;
  * @author miaoj
  */
 @Configuration
-@EnableConfigurationProperties(value = {IMapingConfigurationProperties.class})
+@EnableConfigurationProperties(value = {
+        IMapingConfigurationProperties.class,
+        IMapingTokenConfigurationProperties.class
+})
 public class IMapingPropertiesConfiguration {
 }
 

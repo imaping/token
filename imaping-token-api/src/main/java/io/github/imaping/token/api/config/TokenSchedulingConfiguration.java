@@ -6,7 +6,7 @@ import io.github.imaping.token.api.common.BeanSupplier;
 import io.github.imaping.token.api.common.Cleanable;
 import io.github.imaping.token.api.common.FunctionUtils;
 import io.github.imaping.token.api.lock.LockRepository;
-import io.github.imaping.token.configuration.IMapingConfigurationProperties;
+import io.github.imaping.token.configuration.IMapingTokenConfigurationProperties;
 import io.github.imaping.token.api.registry.DefaultTokenRegistryCleaner;
 import io.github.imaping.token.api.registry.NoOpTokenRegistryCleaner;
 import io.github.imaping.token.api.registry.TokenRegistry;
@@ -30,10 +30,10 @@ public class TokenSchedulingConfiguration {
     @ConditionalOnMissingBean(name = "tokenRegistryCleaner")
     @Bean
     public TokenRegistryCleaner tokenRegistryCleaner(
-            final IMapingConfigurationProperties properties,
+            final IMapingTokenConfigurationProperties properties,
             @Qualifier(LockRepository.BEAN_NAME) final LockRepository lockRepository,
             @Qualifier(TokenRegistry.BEAN_NAME) final TokenRegistry tokenRegistry) {
-        val isCleanerEnabled = properties.getToken().getRegistry().getCleaner().getSchedule().isEnabled();
+        val isCleanerEnabled = properties.getRegistry().getCleaner().getSchedule().isEnabled();
         if (isCleanerEnabled) {
             log.debug("Token registry cleaner is enabled.");
             return new DefaultTokenRegistryCleaner(lockRepository, tokenRegistry);

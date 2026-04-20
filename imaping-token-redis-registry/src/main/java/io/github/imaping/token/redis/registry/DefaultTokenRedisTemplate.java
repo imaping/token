@@ -16,6 +16,7 @@ import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
+import java.time.Duration;
 import java.util.Spliterator;
 import java.util.Spliterators;
 import java.util.stream.Stream;
@@ -32,7 +33,7 @@ public class DefaultTokenRedisTemplate<K, V> extends RedisTemplate<K, V> impleme
         objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         objectMapper.registerModule(new JavaTimeModule());
         objectMapper.activateDefaultTyping(objectMapper.getPolymorphicTypeValidator(), ObjectMapper.DefaultTyping.NON_FINAL, JsonTypeInfo.As.PROPERTY);
-        Jackson2JsonRedisSerializer<Token> jackson2JsonRedisSerializer = new Jackson2JsonRedisSerializer<>(objectMapper, Token.class);
+        Jackson2JsonRedisSerializer<Object> jackson2JsonRedisSerializer = new Jackson2JsonRedisSerializer<>(objectMapper, Object.class);
         setKeySerializer(string);
         setValueSerializer(jackson2JsonRedisSerializer);
         setHashKeySerializer(string);
@@ -52,10 +53,14 @@ public class DefaultTokenRedisTemplate<K, V> extends RedisTemplate<K, V> impleme
         if (count > 0) {
             scanOptions = scanOptions.count(count);
         }
-        val cursor = getConnectionFactory().getConnection().scan(scanOptions.build());
+        final var connection = getConnectionFactory().getConnection();
+        val cursor = connection.keyCommands().scan(scanOptions.build());
         return StreamSupport
                 .stream(Spliterators.spliteratorUnknownSize(cursor, Spliterator.ORDERED), false)
-                .onClose(() -> IOUtils.closeQuietly(cursor))
+                .onClose(() -> {
+                    IOUtils.closeQuietly(cursor);
+                    connection.close();
+                })
                 .map(key -> (String) getKeySerializer().deserialize(key))
                 .distinct();
     }

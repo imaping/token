@@ -3,7 +3,9 @@ package io.github.imaping.token.resource.client.filter;
 import io.github.imaping.token.api.authentication.DefaultBearerTokenAuthenticationToken;
 import io.github.imaping.token.api.exception.TokenAuthenticationException;
 import io.github.imaping.token.api.exception.TokenError;
-import io.github.imaping.token.configuration.IMapingConfigurationProperties;
+import io.github.imaping.token.configuration.IMapingTokenConfigurationProperties;
+import io.github.imaping.token.configuration.model.token.TokenCookieProperties;
+import io.github.imaping.token.configuration.model.token.TokenTransportProperties;
 import io.github.imaping.token.resource.client.authentication.TokenAuthenticationEntryPoint;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -13,6 +15,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -34,15 +37,19 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
 
     private final AuthenticationFailureHandler authenticationFailureHandler;
 
-    private final IMapingConfigurationProperties properties;
+    private final IMapingTokenConfigurationProperties properties;
+    private final TokenTransportProperties transportProperties;
+    private final TokenCookieProperties cookieProperties;
 
 
-    public TokenAuthenticationFilter(AuthenticationManager authenticationManager, TokenAuthenticationEntryPoint authenticationEntryPoint, IMapingConfigurationProperties properties) {
+    public TokenAuthenticationFilter(AuthenticationManager authenticationManager, TokenAuthenticationEntryPoint authenticationEntryPoint, IMapingTokenConfigurationProperties properties) {
         Assert.notNull(authenticationManager, "authenticationManager cannot be null");
         Assert.notNull(authenticationEntryPoint, "authenticationEntryPoint cannot be null");
         this.authenticationManager = authenticationManager;
         this.authenticationFailureHandler = authenticationEntryPoint::commence;
         this.properties = properties;
+        this.transportProperties = properties.getAccessToken().getTransport();
+        this.cookieProperties = properties.getAccessToken().getCookie();
     }
 
     @Override
@@ -66,10 +73,7 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
             SecurityContextHolder.setContext(context);
             chain.doFilter(request, response);
         } catch (AuthenticationException failed) {
-            Cookie tokenCookie = new Cookie(properties.getToken().getAccessTokenName().toUpperCase(), null);
-            tokenCookie.setPath("/");
-            tokenCookie.setMaxAge(0);
-            response.addCookie(tokenCookie);
+            clearTokenCookie(response);
             SecurityContextHolder.clearContext();
             if (log.isDebugEnabled()) {
                 log.debug("Authentication request for failed!", failed);
@@ -81,39 +85,39 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
 
     private String resolve(HttpServletRequest request) {
         String cookieToken = resolveFromCookies(request.getCookies());
-        String authorizationHeaderToken = resolveFromAuthorizationHeader(request);
+        String authorizationHeaderToken = resolveFromHeaders(request);
         String parameterToken = resolveFromRequestParameters(request);
         if (cookieToken == null && authorizationHeaderToken == null && parameterToken == null) {
             return null;
         }
-        TokenError error = new TokenError(TokenError.INVALID_REQUEST,
-                HttpStatus.BAD_REQUEST,
-                "Found multiple bearer tokens in the request");
         if (isCookieTokenSupportedForRequest() && cookieToken != null) {
             if ((isParameterTokenSupportedForRequest(request) && parameterToken != null) || authorizationHeaderToken != null) {
-                throw new TokenAuthenticationException(error);
+                throw multipleBearerTokenException();
             }
             return cookieToken;
         }
         if (isParameterTokenSupportedForRequest(request) && parameterToken != null) {
             if ((isCookieTokenSupportedForRequest() && cookieToken != null) || authorizationHeaderToken != null) {
-                throw new TokenAuthenticationException(error);
+                throw multipleBearerTokenException();
             }
             return parameterToken;
         }
         if (authorizationHeaderToken != null) {
             if ((isCookieTokenSupportedForRequest() && cookieToken != null) || isParameterTokenSupportedForRequest(request) && parameterToken != null) {
-                throw new TokenAuthenticationException(error);
+                throw multipleBearerTokenException();
             }
             return authorizationHeaderToken;
         }
-        throw new TokenAuthenticationException(error);
+        throw multipleBearerTokenException();
     }
 
     private String resolveFromCookies(Cookie[] cookies) {
+        if (!isCookieTokenSupportedForRequest()) {
+            return null;
+        }
         if (cookies != null) {
             for (Cookie cookie : cookies) {
-                if (cookie.getName().equalsIgnoreCase(properties.getToken().getAccessTokenName())) {
+                if (cookie.getName().equalsIgnoreCase(properties.getAccessTokenName())) {
                     return cookie.getValue();
                 }
             }
@@ -122,11 +126,12 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private boolean isParameterTokenSupportedForRequest(HttpServletRequest request) {
-        return (("POST".equals(request.getMethod())) || ("GET".equals(request.getMethod())));
+        return transportProperties.isAllowRequestParameter()
+                && (("POST".equals(request.getMethod())) || ("GET".equals(request.getMethod())));
     }
 
     private boolean isCookieTokenSupportedForRequest() {
-        return true;
+        return transportProperties.isAllowCookie();
     }
 
     private static final Pattern authorizationPattern = Pattern.compile(
@@ -134,7 +139,10 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
             Pattern.CASE_INSENSITIVE);
 
     private String resolveFromRequestParameters(HttpServletRequest request) {
-        String[] values = request.getParameterValues(properties.getToken().getAccessTokenName());
+        if (!transportProperties.isAllowRequestParameter()) {
+            return null;
+        }
+        String[] values = request.getParameterValues(properties.getAccessTokenName());
         if (values == null || values.length == 0) {
             return null;
         }
@@ -142,13 +150,33 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
         if (values.length == 1) {
             return values[0];
         }
-        TokenError error = new TokenError(TokenError.INVALID_REQUEST,
-                HttpStatus.BAD_REQUEST,
-                "Found multiple bearer tokens in the request");
-        throw new TokenAuthenticationException(error);
+        throw multipleBearerTokenException();
     }
 
-    private static String resolveFromAuthorizationHeader(HttpServletRequest request) {
+    private String resolveFromHeaders(final HttpServletRequest request) {
+        String authorizationHeaderToken = resolveFromAuthorizationHeader(request);
+        String namedHeaderToken = resolveFromNamedHeader(request);
+        if (!StringUtils.hasText(authorizationHeaderToken)) {
+            return namedHeaderToken;
+        }
+        if (!StringUtils.hasText(namedHeaderToken) || authorizationHeaderToken.equals(namedHeaderToken)) {
+            return authorizationHeaderToken;
+        }
+        throw multipleBearerTokenException();
+    }
+
+    private String resolveFromNamedHeader(final HttpServletRequest request) {
+        if (!transportProperties.isAllowNamedHeader()) {
+            return null;
+        }
+        final String token = request.getHeader(properties.getAccessTokenName());
+        return StringUtils.hasText(token) ? token.trim() : null;
+    }
+
+    private String resolveFromAuthorizationHeader(HttpServletRequest request) {
+        if (!transportProperties.isAllowAuthorizationHeader()) {
+            return null;
+        }
         String authorization = request.getHeader(HttpHeaders.AUTHORIZATION);
         if (StringUtils.startsWithIgnoreCase(authorization, "bearer")) {
             Matcher matcher = authorizationPattern.matcher(authorization);
@@ -162,6 +190,28 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
             return matcher.group("token");
         }
         return null;
+    }
+
+    private TokenAuthenticationException multipleBearerTokenException() {
+        TokenError error = new TokenError(TokenError.INVALID_REQUEST,
+                HttpStatus.BAD_REQUEST,
+                "Found multiple bearer tokens in the request");
+        return new TokenAuthenticationException(error);
+    }
+
+    private void clearTokenCookie(final HttpServletResponse response) {
+        ResponseCookie.ResponseCookieBuilder builder = ResponseCookie.from(properties.getAccessTokenName(), "")
+                .path(cookieProperties.getPath())
+                .httpOnly(cookieProperties.isHttpOnly())
+                .secure(cookieProperties.isSecure())
+                .maxAge(0);
+        if (StringUtils.hasText(cookieProperties.getDomain())) {
+            builder.domain(cookieProperties.getDomain());
+        }
+        if (StringUtils.hasText(cookieProperties.getSameSite())) {
+            builder.sameSite(cookieProperties.getSameSite());
+        }
+        response.addHeader(HttpHeaders.SET_COOKIE, builder.build().toString());
     }
 }
 

@@ -2,7 +2,7 @@ package io.github.imaping.token.resource.client.config;
 
 import io.github.imaping.token.api.factory.TokenFactory;
 import io.github.imaping.token.api.registry.TokenRegistry;
-import io.github.imaping.token.configuration.IMapingConfigurationProperties;
+import io.github.imaping.token.configuration.IMapingTokenConfigurationProperties;
 import io.github.imaping.token.resource.client.authentication.TokenAuthenticationEntryPoint;
 import io.github.imaping.token.resource.client.authentication.TokenAuthenticationProvider;
 import io.github.imaping.token.resource.client.filter.TokenAuthenticationFilter;
@@ -24,6 +24,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.util.CollectionUtils;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -36,10 +37,10 @@ public class TokenSecurityConfig {
 
     private final TokenFactory tokenFactory;
 
-    private final IMapingConfigurationProperties properties;
+    private final IMapingTokenConfigurationProperties properties;
 
 
-    public TokenSecurityConfig(TokenRegistry tokenRegistry, @Qualifier(TokenFactory.BEAN_NAME) TokenFactory tokenFactory, IMapingConfigurationProperties properties) {
+    public TokenSecurityConfig(TokenRegistry tokenRegistry, @Qualifier(TokenFactory.BEAN_NAME) TokenFactory tokenFactory, IMapingTokenConfigurationProperties properties) {
         this.tokenRegistry = tokenRegistry;
         this.tokenFactory = tokenFactory;
         this.properties = properties;
@@ -52,7 +53,7 @@ public class TokenSecurityConfig {
 
     @Bean
     public TokenAuthenticationEntryPoint tokenAuthenticationEntryPoint() {
-        return new TokenAuthenticationEntryPoint();
+        return new TokenAuthenticationEntryPoint(properties);
     }
 
     @Bean
@@ -67,9 +68,8 @@ public class TokenSecurityConfig {
                 .authorizeHttpRequests(registry -> {
                     authorizeHttpRequests(registry);
                     if (!CollectionUtils.isEmpty(getAuthenticatedAntMatchersWithMethod())) {
-                        getAuthenticatedAntMatchersWithMethod().forEach((method, antPatterns) -> {
-                            registry.requestMatchers(method, antPatterns).authenticated();
-                        });
+                        getAuthenticatedAntMatchersWithMethod().forEach((method, antPatterns) ->
+                                registry.requestMatchers(method, antPatterns).authenticated());
                     }
                     if (!ArrayUtils.isEmpty(getAuthenticatedAntMatchers())) {
                         registry.requestMatchers(getAuthenticatedAntMatchers()).authenticated();
@@ -78,9 +78,8 @@ public class TokenSecurityConfig {
                         registry.requestMatchers(getPermitAntMatchers()).permitAll();
                     }
                     if (!CollectionUtils.isEmpty(getPermitAntMatchersWithMethod())) {
-                        getPermitAntMatchersWithMethod().forEach((method, antPatterns) -> {
-                            registry.requestMatchers(method, antPatterns).permitAll();
-                        });
+                        getPermitAntMatchersWithMethod().forEach((method, antPatterns) ->
+                                registry.requestMatchers(method, antPatterns).permitAll());
                     }
                     if (isAnyRequestAuthenticated()) {
                         registry.anyRequest().authenticated();
@@ -115,7 +114,7 @@ public class TokenSecurityConfig {
      * 不需要授权 AntMatchers
      */
     protected String[] getPermitAntMatchers() {
-        return null;
+        return new String[]{"/error"};
     }
 
     /**
@@ -131,10 +130,7 @@ public class TokenSecurityConfig {
      */
     protected Map<HttpMethod, String[]> getPermitAntMatchersWithMethod() {
         Map<HttpMethod, String[]> permitMap = new HashMap<>();
-        if (!properties.getCloud().isEnabled()) {
-            permitMap.put(HttpMethod.OPTIONS, new String[]{"/**"});
-        }
-        permitMap.put(HttpMethod.GET, new String[]{"/**"});
+        permitMap.put(HttpMethod.OPTIONS, new String[]{"/**"});
         return permitMap;
     }
 
@@ -142,15 +138,15 @@ public class TokenSecurityConfig {
      * 需要授权 AntMatchers with method
      */
     protected Map<HttpMethod, String[]> getAuthenticatedAntMatchersWithMethod() {
-        return null;
+        return Collections.emptyMap();
     }
 
     public static class AuthenticationFilterDsl extends AbstractHttpConfigurer<AuthenticationFilterDsl, HttpSecurity> {
 
         private final TokenAuthenticationEntryPoint entryPoint;
-        private final IMapingConfigurationProperties properties;
+        private final IMapingTokenConfigurationProperties properties;
 
-        public AuthenticationFilterDsl(TokenAuthenticationEntryPoint entryPoint, IMapingConfigurationProperties properties) {
+        public AuthenticationFilterDsl(TokenAuthenticationEntryPoint entryPoint, IMapingTokenConfigurationProperties properties) {
             this.entryPoint = entryPoint;
             this.properties = properties;
         }
@@ -161,7 +157,7 @@ public class TokenSecurityConfig {
             http.addFilterBefore(new TokenAuthenticationFilter(authenticationManager, entryPoint, properties), UsernamePasswordAuthenticationFilter.class);
         }
 
-        public static AuthenticationFilterDsl custom(TokenAuthenticationEntryPoint entryPoint, IMapingConfigurationProperties properties) {
+        public static AuthenticationFilterDsl custom(TokenAuthenticationEntryPoint entryPoint, IMapingTokenConfigurationProperties properties) {
             return new AuthenticationFilterDsl(entryPoint, properties);
         }
     }

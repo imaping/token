@@ -2,7 +2,7 @@ package io.github.imaping.token.test.config;
 
 import io.github.imaping.token.api.factory.TokenFactory;
 import io.github.imaping.token.api.registry.TokenRegistry;
-import io.github.imaping.token.configuration.IMapingConfigurationProperties;
+import io.github.imaping.token.configuration.IMapingTokenConfigurationProperties;
 import io.github.imaping.token.resource.client.config.TokenSecurityConfig;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Configuration;
@@ -19,7 +19,7 @@ import java.util.Map;
 @Configuration
 public class TestSecurityConfigurerAdapter extends TokenSecurityConfig {
 
-    public TestSecurityConfigurerAdapter(TokenRegistry tokenRegistry, @Qualifier(TokenFactory.BEAN_NAME) TokenFactory tokenFactory, IMapingConfigurationProperties properties) {
+    public TestSecurityConfigurerAdapter(TokenRegistry tokenRegistry, @Qualifier(TokenFactory.BEAN_NAME) TokenFactory tokenFactory, IMapingTokenConfigurationProperties properties) {
         super(tokenRegistry, tokenFactory, properties);
     }
 

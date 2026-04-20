@@ -1,7 +1,7 @@
 package io.github.imaping.token.api.config;
 
 import io.github.imaping.token.api.factory.*;
-import io.github.imaping.token.configuration.IMapingConfigurationProperties;
+import io.github.imaping.token.configuration.IMapingTokenConfigurationProperties;
 import io.github.imaping.token.api.authentication.TokenUserInfoContext;
 import io.github.imaping.token.api.common.BeanCondition;
 import io.github.imaping.token.api.common.BeanSupplier;
@@ -14,7 +14,6 @@ import io.github.imaping.token.api.generator.UniqueTokenIdGenerator;
 import io.github.imaping.token.api.lock.LockRepository;
 import io.github.imaping.token.api.model.HardTimeoutToken;
 import io.github.imaping.token.api.model.TimeoutAccessToken;
-import io.github.imaping.token.api.model.Token;
 import io.github.imaping.token.api.registry.CachingTokenRegistry;
 import io.github.imaping.token.api.registry.ConcurrentSessionControlTokenRegistry;
 import io.github.imaping.token.api.registry.DefaultTokenRegistry;
@@ -57,12 +56,12 @@ public class TokenApiConfig {
     }
 
     @Bean
-    public ExpirationPolicyBuilder<TimeoutAccessToken> accessTokenExpirationPolicy(final IMapingConfigurationProperties properties) {
+    public ExpirationPolicyBuilder<TimeoutAccessToken> accessTokenExpirationPolicy(final IMapingTokenConfigurationProperties properties) {
         return new TimeoutExpirationPolicyBuilder(properties);
     }
 
     @Bean
-    public HardTimeoutExpirationPolicyBuilder<HardTimeoutToken> hardTimeoutExpirationPolicy(final IMapingConfigurationProperties properties) {
+    public HardTimeoutExpirationPolicyBuilder<HardTimeoutToken> hardTimeoutExpirationPolicy(final IMapingTokenConfigurationProperties properties) {
         return new HardTimeoutExpirationPolicyDefaultBuilder<>(properties);
     }
 
@@ -87,26 +86,24 @@ public class TokenApiConfig {
     @Bean
     public TokenFactory defaultTokenFactory(final List<TokenFactory> factories) {
         DefaultTokenFactory parentFactory = new DefaultTokenFactory();
-        factories.forEach(factory -> {
-            parentFactory.addTokenFactory(factory.getTokenType(), factory);
-        });
+        factories.forEach(factory -> parentFactory.addTokenFactory(factory.getTokenType(), factory));
         return parentFactory;
     }
 
     @ConditionalOnMissingBean(name = TokenRegistry.BEAN_NAME)
     @Bean
-    public TokenRegistry tokenRegistry(final IMapingConfigurationProperties properties,
+    public TokenRegistry tokenRegistry(final IMapingTokenConfigurationProperties properties,
                                        @Qualifier(LockRepository.BEAN_NAME) final LockRepository lockRepository) {
         log.info("Runtime memory is used as the persistence storage for retrieving and managing tokens. "
                 + "Tokens that are issued during runtime will be LOST when the web server is restarted. This MAY impact SSO functionality.");
-        val mem = properties.getToken().getRegistry().getInMemory();
+        val mem = properties.getRegistry().getInMemory();
         final TokenRegistry delegate = mem.isCache()
                 ? new CachingTokenRegistry()
                 : new DefaultTokenRegistry(new ConcurrentHashMap<>(mem.getInitialCapacity(), mem.getLoadFactor(), mem.getConcurrency()));
         return new ConcurrentSessionControlTokenRegistry(
                 delegate,
                 lockRepository,
-                properties.getToken().getRegistry().getConcurrentSessions());
+                properties.getRegistry().getConcurrentSessions());
     }
 
     @Bean(name = UserInfoContext.BEAN_NAME)

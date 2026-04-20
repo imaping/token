@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import io.github.imaping.token.api.expiration.ExpirationPolicy;
 import io.github.imaping.token.api.expiration.HardTimeoutExpirationPolicy;
 import io.github.imaping.token.api.model.HardTimeoutToken;
-import io.github.imaping.token.configuration.IMapingConfigurationProperties;
+import io.github.imaping.token.configuration.IMapingTokenConfigurationProperties;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
@@ -31,11 +31,11 @@ public class HardTimeoutExpirationPolicyDefaultBuilder<T extends HardTimeoutToke
      */
     private static final long serialVersionUID = -4105381841515569079L;
 
-    private final IMapingConfigurationProperties properties;
+    private final IMapingTokenConfigurationProperties properties;
 
     @Override
     public ExpirationPolicy buildTokenExpirationPolicy() {
-        return buildTokenExpirationPolicy(newDuration(properties.getToken().getAccessToken().getTimeToKillInSeconds()).getSeconds());
+        return buildTokenExpirationPolicy(newDuration(properties.getAccessToken().getTimeToKillInSeconds()).getSeconds());
     }
 
     @Override

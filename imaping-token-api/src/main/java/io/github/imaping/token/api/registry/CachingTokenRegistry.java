@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;
 
+import java.time.Duration;
+import java.time.ZonedDateTime;
 import java.util.Map;
 
 @Slf4j
@@ -35,27 +37,41 @@ public class CachingTokenRegistry extends AbstractMapBasedTokenRegistry {
      */
     public static class CachedTokenExpirationPolicy implements Expiry<String, Token> {
 
-        private static long getExpiration(final Token value, final long currentTime) {
+        private static long getExpiration(final Token value) {
             if (value.isExpired()) {
                 log.debug("Token [{}] has expired and shall be evicted from the cache", value.getId());
                 return 0;
             }
-            return currentTime;
+            ZonedDateTime now = ZonedDateTime.now(value.getExpirationPolicy().getClock());
+            long remainingToLive = remainingNanos(now, value.getCreationTime(), value.getExpirationPolicy().getTimeToLive());
+            long remainingToIdle = remainingNanos(now, value.getLastTimeUsed(), value.getExpirationPolicy().getTimeToIdle());
+            if (remainingToLive > 0 && remainingToIdle > 0) {
+                return Math.min(remainingToLive, remainingToIdle);
+            }
+            return Math.max(remainingToLive, remainingToIdle);
+        }
+
+        private static long remainingNanos(final ZonedDateTime now, final ZonedDateTime baseTime, final Long seconds) {
+            if (seconds == null || seconds <= 0 || baseTime == null) {
+                return 0;
+            }
+            Duration duration = Duration.between(now, baseTime.plusSeconds(seconds));
+            return Math.max(duration.toNanos(), 0);
         }
 
         @Override
         public long expireAfterCreate(final String key, final Token value, final long currentTime) {
-            return getExpiration(value, currentTime);
+            return getExpiration(value);
         }
 
         @Override
         public long expireAfterUpdate(final String key, final Token value, final long currentTime, final long currentDuration) {
-            return getExpiration(value, currentDuration);
+            return getExpiration(value);
         }
 
         @Override
         public long expireAfterRead(final String key, final Token value, final long currentTime, final long currentDuration) {
-            return getExpiration(value, currentDuration);
+            return getExpiration(value);
         }
     }
 

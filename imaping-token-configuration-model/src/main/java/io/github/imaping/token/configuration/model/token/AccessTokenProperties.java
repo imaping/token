@@ -3,6 +3,7 @@ package io.github.imaping.token.configuration.model.token;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import org.springframework.boot.context.properties.NestedConfigurationProperty;
 
 /**
  * 访问令牌配置属性类.
@@ -20,5 +21,23 @@ public class AccessTokenProperties {
     private String timeToKillInSeconds = "PT2H";
 
     private boolean createAsJwt;
+
+    /**
+     * Token 传输介质配置。
+     */
+    @NestedConfigurationProperty
+    private TokenTransportProperties transport = new TokenTransportProperties();
+
+    /**
+     * Cookie 安全属性配置。
+     */
+    @NestedConfigurationProperty
+    private TokenCookieProperties cookie = new TokenCookieProperties();
+
+    /**
+     * 认证失败后的跳转安全配置。
+     */
+    @NestedConfigurationProperty
+    private TokenFailureRedirectProperties failureRedirect = new TokenFailureRedirectProperties();
 }
 

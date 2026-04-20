@@ -45,7 +45,7 @@ public class UserInfo<ID extends Serializable> extends BaseUserInfo<ID> {
      * @return 是否为匿名用户
      */
     public boolean isAnonymous() {
-        return !authenticated && StringUtils.isEmpty(loginName);
+        return !authenticated && !StringUtils.hasText(loginName);
     }
  }
 

@@ -9,7 +9,7 @@ import io.github.imaping.token.api.model.Token;
 import io.github.imaping.token.api.registry.ConcurrentSessionControlTokenRegistry;
 import io.github.imaping.token.api.registry.DefaultTokenRegistry;
 import io.github.imaping.token.api.registry.TokenRegistry;
-import io.github.imaping.token.configuration.IMapingConfigurationProperties;
+import io.github.imaping.token.configuration.IMapingTokenConfigurationProperties;
 import io.github.imaping.token.redis.registry.DefaultTokenRedisTemplate;
 import io.github.imaping.token.redis.registry.RedisTokenRegistry;
 import io.github.imaping.token.redis.registry.TokenRedisTemplate;
@@ -35,7 +35,7 @@ public class TokenConfig {
     private static final BeanCondition LOCKING_CONDITION = BeanCondition.on("imaping.token.registry.core.enable-locking").isTrue().evenIfMissing();
 
     @Bean
-    public TokenRedisTemplate<String, Token> tokenRedisTemplate(final RedisConnectionFactory redisConnectionFactory) {
+    public TokenRedisTemplate<String, Object> tokenRedisTemplate(final RedisConnectionFactory redisConnectionFactory) {
         return new DefaultTokenRedisTemplate<>(redisConnectionFactory);
     }
 
@@ -55,9 +55,9 @@ public class TokenConfig {
 
     @Bean
     @ConditionalOnMissingBean(name = TokenRegistry.BEAN_NAME)
-    public TokenRegistry tokenRegistry(@Qualifier("tokenRedisTemplate") final TokenRedisTemplate<String, Token> tokenRedisTemplate,
+    public TokenRegistry tokenRegistry(@Qualifier("tokenRedisTemplate") final TokenRedisTemplate<String, Object> tokenRedisTemplate,
                                        @Qualifier(LockRepository.BEAN_NAME) final LockRepository lockRepository,
-                                       final IMapingConfigurationProperties properties,
+                                       final IMapingTokenConfigurationProperties properties,
                                        final ConfigurableApplicationContext applicationContext) {
 
         final TokenRegistry delegate = BeanSupplier.of(TokenRegistry.class)
@@ -68,7 +68,7 @@ public class TokenConfig {
         return new ConcurrentSessionControlTokenRegistry(
                 delegate,
                 lockRepository,
-                properties.getToken().getRegistry().getConcurrentSessions());
+                properties.getRegistry().getConcurrentSessions());
     }
 
 }
