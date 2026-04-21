@@ -558,48 +558,50 @@ imaping:
 
 **步骤 1: 定义 Token 接口**
 ```java
-public interface RefreshToken extends Token {
-    String getRefreshTokenId();
-    ZonedDateTime getRefreshExpirationTime();
+public interface CustomRefreshToken extends AuthenticationAwareToken {
+    String getAccessTokenId();
 }
 ```
 
 **步骤 2: 实现 Token**
 ```java
-public class DefaultRefreshToken extends AbstractToken implements RefreshToken {
-    private static final String PREFIX = "RT";
-    private String refreshTokenId;
-    private ZonedDateTime refreshExpirationTime;
+public class CustomRefreshTokenImpl extends AbstractToken implements CustomRefreshToken {
+    public static final String PREFIX = "CRT";
+    private String accessTokenId;
 
-    @Override
-    public String getId() {
-        return PREFIX + super.getId();
+    public CustomRefreshTokenImpl(String id, ExpirationPolicy expirationPolicy,
+                                  Authentication<?> authentication, String accessTokenId) {
+        super(id, expirationPolicy, authentication);
+        this.accessTokenId = accessTokenId;
     }
 
-    // 实现其他方法...
+    @Override
+    public String getPrefix() {
+        return PREFIX;
+    }
 }
 ```
 
 **步骤 3: 实现 TokenFactory**
 ```java
 @Component
-public class RefreshTokenFactory implements TokenFactory {
+public class CustomRefreshTokenFactory implements TokenFactory {
+
+    private final UniqueTokenIdGenerator idGenerator;
 
     @Override
     public Class<? extends Token> getTokenType() {
-        return RefreshToken.class;
+        return CustomRefreshToken.class;
     }
 
-    @Override
-    public Token createToken(Authentication authentication) {
-        DefaultRefreshToken token = new DefaultRefreshToken();
-        token.setAuthentication(authentication);
-        token.setExpirationPolicy(buildExpirationPolicy());
-        token.setRefreshTokenId(generateRefreshId());
-        return token;
+    public CustomRefreshToken create(Authentication<?> authentication, String accessTokenId) {
+        return new CustomRefreshTokenImpl(
+                idGenerator.getNewTokenId(CustomRefreshTokenImpl.PREFIX),
+                new HardTimeoutExpirationPolicy(Duration.ofDays(7).getSeconds()),
+                authentication,
+                accessTokenId
+        );
     }
-
-    // 实现其他方法...
 }
 ```
 
@@ -609,8 +611,8 @@ public class RefreshTokenFactory implements TokenFactory {
 public class CustomTokenConfig {
 
     @Bean
-    public TokenFactory refreshTokenFactory() {
-        return new RefreshTokenFactory();
+    public CustomRefreshTokenFactory customRefreshTokenFactory() {
+        return new CustomRefreshTokenFactory();
     }
 }
 ```

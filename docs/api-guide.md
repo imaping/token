@@ -37,7 +37,7 @@ imaping-token 提供三个核心 API:
 | API | 职责 | 常用方法 |
 |-----|------|----------|
 | **TokenRegistry** | Token 存储和管理 | `addToken()`, `getToken()`, `updateToken()`, `deleteToken()` |
-| **TokenFactory** | Token 创建工厂 | `createToken()` (通过子类实现) |
+| **TokenFactory** | Token 创建工厂 | `getTokenType()`, `get()`，由具体子工厂暴露 `create(...)` |
 | **ExpirationPolicy** | Token 过期策略 | `isExpired()`, `getTimeToLive()` |
 
 ### 核心依赖注入
@@ -127,7 +127,7 @@ public class TokenService {
                     .build();
 
             // 4. 使用工厂创建 Token
-            TimeoutAccessToken token = (TimeoutAccessToken) timeoutTokenFactory.createToken(authentication);
+            TimeoutAccessToken token = timeoutTokenFactory.create(authentication);
 
             // 5. 添加 Token 到注册表
             tokenRegistry.addToken(token);
@@ -832,13 +832,13 @@ public class TokenCreationService {
     public TimeoutAccessToken createTimeoutToken(Authentication authentication) {
         // 获取 TimeoutTokenFactory
         TokenFactory factory = defaultTokenFactory.get(TimeoutAccessToken.class);
-        return (TimeoutAccessToken) factory.createToken(authentication);
+        return ((TimeoutTokenFactory) factory).create(authentication);
     }
 
     public HardTimeoutToken createHardTimeoutToken(Authentication authentication) {
         // 获取 HardTimeoutTokenFactory
         TokenFactory factory = defaultTokenFactory.get(HardTimeoutToken.class);
-        return (HardTimeoutToken) factory.createToken(authentication);
+        return ((HardTimeoutTokenFactory) factory).create(authentication);
     }
 }
 ```
@@ -894,7 +894,7 @@ public class TimeoutTokenService {
                 .build();
 
         // 创建 Token
-        TimeoutAccessToken token = (TimeoutAccessToken) timeoutTokenFactory.createToken(authentication);
+        TimeoutAccessToken token = timeoutTokenFactory.create(authentication);
 
         log.info("TimeoutAccessToken created: {}, expires at: {}",
                 token.getId(),
@@ -978,7 +978,7 @@ public class HardTimeoutTokenService {
                 .build();
 
         // 创建 Token
-        HardTimeoutToken token = (HardTimeoutToken) hardTimeoutTokenFactory.createToken(authentication);
+        HardTimeoutToken token = hardTimeoutTokenFactory.create(authentication);
 
         ZonedDateTime expirationTime = token.getCreationTime()
                 .plusSeconds(token.getExpirationPolicy().getTimeToLive());
@@ -1264,7 +1264,7 @@ public class CustomRefreshTokenFactory implements RefreshTokenFactory {
         return RefreshToken.class;
     }
 
-    public Token createToken(Authentication authentication) {
+    public Token create(Authentication authentication) {
         throw new UnsupportedOperationException("请使用 create(authentication, accessTokenId)");
     }
 
@@ -1359,7 +1359,7 @@ public class RefreshTokenService {
     public TokenPair createTokenPair(Authentication authentication, TimeoutAccessToken accessToken) {
         try {
             // 创建 RefreshToken 并关联 AccessToken
-            RefreshToken refreshToken = refreshTokenFactory.createToken(
+            RefreshToken refreshToken = refreshTokenFactory.create(
                     authentication,
                     accessToken.getId()
             );
@@ -1630,7 +1630,7 @@ public class WorkingHoursTokenFactory implements TokenFactory {
     /**
      * 创建工作时间 Token
      */
-    public Token createToken(Authentication authentication) {
+    public Token create(Authentication authentication) {
         String tokenId = tokenIdGenerator.getNewTokenId("WHT");
         ExpirationPolicy expirationPolicy = policyBuilder.buildExpirationPolicy();
 
@@ -1682,7 +1682,7 @@ public class WorkingHoursTokenService {
      */
     public Token createWorkingHoursToken(Authentication authentication) {
         try {
-            Token token = tokenFactory.createToken(authentication);
+            Token token = tokenFactory.create(authentication);
             tokenRegistry.addToken(token);
 
             log.info("WorkingHoursToken created: {}", token.getId());
