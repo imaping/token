@@ -99,14 +99,14 @@ Collection<Token> tokens = tokenRegistry.getSessionsFor(userId);
     <dependency>
         <groupId>io.github.imaping</groupId>
         <artifactId>imaping-token-api</artifactId>
-        <version>1.5.0</version>
+        <version>1.6.0</version>
     </dependency>
 
     <!-- Spring Security 集成 -->
     <dependency>
         <groupId>io.github.imaping</groupId>
         <artifactId>imaping-token-resource-client</artifactId>
-        <version>1.5.0</version>
+        <version>1.6.0</version>
     </dependency>
 </dependencies>
 ```
@@ -127,21 +127,21 @@ Collection<Token> tokens = tokenRegistry.getSessionsFor(userId);
     <dependency>
         <groupId>io.github.imaping</groupId>
         <artifactId>imaping-token-api</artifactId>
-        <version>1.5.0</version>
+        <version>1.6.0</version>
     </dependency>
 
     <!-- Redis 存储实现 -->
     <dependency>
         <groupId>io.github.imaping</groupId>
         <artifactId>imaping-token-redis-registry</artifactId>
-        <version>1.5.0</version>
+        <version>1.6.0</version>
     </dependency>
 
     <!-- Spring Security 集成 -->
     <dependency>
         <groupId>io.github.imaping</groupId>
         <artifactId>imaping-token-resource-client</artifactId>
-        <version>1.5.0</version>
+        <version>1.6.0</version>
     </dependency>
 </dependencies>
 ```
@@ -515,7 +515,7 @@ curl -X POST -H "access_token: AT-1-abcd1234efgh5678ijkl9012mnop3456" \
 <dependency>
     <groupId>io.github.imaping</groupId>
     <artifactId>imaping-token-redis-registry</artifactId>
-    <version>1.5.0</version>
+    <version>1.6.0</version>
 </dependency>
 ```
 
